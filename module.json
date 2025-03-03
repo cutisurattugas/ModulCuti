@@ -1,0 +1,13 @@
+{
+    "name": "Cuti",
+    "alias": "cuti",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Cuti\\Providers\\CutiServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
