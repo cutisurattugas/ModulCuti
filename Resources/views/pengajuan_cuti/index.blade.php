@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <h1>Cuti</h1>
                     <div class="lead">
-                        Manaje cuti.
+                        Manaje pengajuan cuti.
                         <a href="#" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
                     </div>
 
@@ -70,7 +70,7 @@
                     </table>
 
                     <div class="d-flex">
-                        {{-- {!! $roles->links('pagination::bootstrap-4') !!} --}}
+                        {{-- {!! $cuti->links('pagination::bootstrap-4') !!} --}}
                     </div>
 
                 </div>

@@ -5,6 +5,7 @@ namespace Modules\Cuti\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Cuti\Entities\Cuti;
 
 class CutiController extends Controller
 {
@@ -14,7 +15,8 @@ class CutiController extends Controller
      */
     public function index()
     {
-        return view('cuti::index');
+        $cuti = Cuti::all();
+        return view('cuti::pengajuan_cuti.index', compact('cuti'));
     }
 
     /**
