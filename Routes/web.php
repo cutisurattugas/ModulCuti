@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('cuti')->group(function () {
     Route::prefix('pengajuan')->group(function () {
         Route::get('/', 'CutiController@index')->name('cuti.index');
+        Route::get('/tambah', 'CutiController@create')->name('cuti.create');
+        Route::post('/store', 'CutiController@store')->name('cuti.store');
     });
     Route::prefix('jenis')->group(function () {
         Route::get('/', 'JenisCutiController@index')->name('jenis_cuti.index');
