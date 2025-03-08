@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Cuti\Entities\Cuti;
+use Modules\Cuti\Entities\JenisCuti;
 
 class CutiController extends Controller
 {
@@ -25,7 +26,8 @@ class CutiController extends Controller
      */
     public function create()
     {
-        return view('cuti::create');
+        $jenis_cuti = JenisCuti::all();
+        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti'));
     }
 
     /**

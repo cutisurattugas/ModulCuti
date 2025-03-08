@@ -11,7 +11,7 @@
                     <h1>Cuti</h1>
                     <div class="lead">
                         Manaje pengajuan cuti.
-                        <a href="#" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
+                        <a href="{{route('cuti.create')}}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
                     </div>
 
                     <div class="mt-2">
@@ -77,4 +77,4 @@
             </div>
         </div>
     </div>
-@endsection
+@stop
