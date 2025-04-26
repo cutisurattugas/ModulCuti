@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\JenisCuti;
+use Modules\Pengaturan\Entities\Pegawai;
+use Modules\Pengaturan\Entities\TimKerja;
 
 class CutiController extends Controller
 {
@@ -27,7 +29,8 @@ class CutiController extends Controller
     public function create()
     {
         $jenis_cuti = JenisCuti::all();
-        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti'));
+        $pegawai = Pegawai::where('username', auth()->user()->username)->first();
+        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai'));
     }
 
     /**
@@ -37,7 +40,17 @@ class CutiController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $pimpinan = TimKerja::where('id', '1')->first()->ketua_id;
+        $pegawai = Pegawai::where('username', $request->pegawai)->first()->id;
+        dd(
+            [
+                'jenis_cuti' => $request->jenis_cuti,
+                'rentang_cuti' => $request->rentang_cuti,
+                'keterangan' => $request->keterangan,
+                'pimpinan' => $pimpinan,
+                'pegawai' => $pegawai
+            ]
+        );
     }
 
     /**

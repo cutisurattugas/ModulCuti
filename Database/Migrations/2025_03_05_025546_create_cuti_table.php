@@ -15,6 +15,10 @@ class CreateCutiTable extends Migration
     {
         Schema::create('cuti', function (Blueprint $table) {
             $table->id();
+            $table->string('nama');
+            $table->string('nip_nik');
+            $table->string('nama_atasan');
+            $table->string('nip_nik_atasan');
             $table->string('tanggal_mulai');
             $table->string('tanggal_selesai');
             $table->text('keterangan');

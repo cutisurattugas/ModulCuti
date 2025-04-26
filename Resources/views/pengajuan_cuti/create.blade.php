@@ -18,19 +18,11 @@
                             <table class="table">
                                 <tr>
                                     <td>Nama</td>
-                                    <td>: Ilham</td>
+                                    <td>: {{ $pegawai->gelar_dpn ?? '' }}{{ $pegawai->gelar_dpn ? ' ' : '' }}{{ $pegawai->nama }}{{ $pegawai->gelar_blk ? ', ' . $pegawai->gelar_blk : '' }}</td>
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
-                                    <td>: 123456</td>
-                                </tr>
-                                <tr>
-                                    <td>Golongan</td>
-                                    <td>: II C</td>
-                                </tr>
-                                <tr>
-                                    <td>Jabatan</td>
-                                    <td>: Tenaga Kependidikan</td>
+                                    <td>: {{$pegawai->nip}}</td>
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
@@ -53,14 +45,6 @@
                                     <td>: 78910</td>
                                 </tr>
                                 <tr>
-                                    <td>Golongan</td>
-                                    <td>: II C</td>
-                                </tr>
-                                <tr>
-                                    <td>Jabatan</td>
-                                    <td>: Ketua Jurusan</td>
-                                </tr>
-                                <tr>
                                     <td>Unit Kerja</td>
                                     <td>: Bisnis & Informatika</td>
                                 </tr>
@@ -75,6 +59,7 @@
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
+                            <input type="hidden" name="pegawai" value="{{Auth::user()->username}}">
                             <div class="col-md-6">
                                 <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
                                 <select class="form-control" name="jenis_cuti" id="jenis_cuti">
