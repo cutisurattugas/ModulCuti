@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\JenisCuti;
+use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
+use Modules\Pengaturan\Entities\Pejabat;
 use Modules\Pengaturan\Entities\TimKerja;
 
 class CutiController extends Controller
@@ -30,7 +32,11 @@ class CutiController extends Controller
     {
         $jenis_cuti = JenisCuti::all();
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
-        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai'));
+        $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
+        $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
+        $ketua = Pejabat::where('id', $tim->ketua_id)->first();
+        // dd($ketua);
+        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua'));
     }
 
     /**

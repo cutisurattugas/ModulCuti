@@ -26,7 +26,7 @@
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: Bisnis & Informatika</td>
+                                    <td>: {{$tim->unit->nama}}</td>
                                 </tr>
                             </table>
                         </div>
@@ -38,15 +38,15 @@
                             <table class="table">
                                 <tr>
                                     <td>Nama</td>
-                                    <td>: Cendy</td>
+                                    <td>: {{$ketua->pegawai}}</td>
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
-                                    <td>: 78910</td>
+                                    <td>: {{$ketua->nip}}</td>
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: Bisnis & Informatika</td>
+                                    <td>: {{$tim->unit->nama}}</td>
                                 </tr>
                             </table>
                         </div>
