@@ -4,8 +4,11 @@ namespace Modules\Cuti\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
+use Modules\Pengaturan\Entities\TimKerja;
+use Modules\Pengaturan\Entities\Unit;
 
 class Cuti extends Model
 {
@@ -25,5 +28,17 @@ class Cuti extends Model
 
     public function pejabat(){
         return $this->belongsTo(Pejabat::class);
+    }
+
+    public function tim_kerja(){
+        return $this->belongsTo(TimKerja::class);
+    }
+
+    public function anggota_tim_kerja(){
+        return $this->belongsTo(Anggota::class);
+    }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class);
     }
 }
