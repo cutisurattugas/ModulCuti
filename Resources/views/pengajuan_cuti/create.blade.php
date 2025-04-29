@@ -59,7 +59,10 @@
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
-                            <input type="hidden" name="pegawai" value="{{Auth::user()->username}}">
+                            <input type="hidden" name="pegawai_id" value="{{$pegawai->id}}">
+                            <input type="hidden" name="pegawai_nip" value="{{$pegawai->nip}}">
+                            <input type="hidden" name="atasan_id" value="{{$ketua->id}}">
+                            <input type="hidden" name="atasan_nip" value="{{$ketua->nip}}">
                             <div class="col-md-6">
                                 <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
                                 <select class="form-control" name="jenis_cuti" id="jenis_cuti">

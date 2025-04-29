@@ -46,17 +46,33 @@ class CutiController extends Controller
      */
     public function store(Request $request)
     {
-        $pimpinan = TimKerja::where('id', '1')->first()->ketua_id;
-        $pegawai = Pegawai::where('username', $request->pegawai)->first()->id;
-        dd(
-            [
-                'jenis_cuti' => $request->jenis_cuti,
-                'rentang_cuti' => $request->rentang_cuti,
-                'keterangan' => $request->keterangan,
-                'pimpinan' => $pimpinan,
-                'pegawai' => $pegawai
-            ]
-        );
+        // Explode data rentang cuti
+        $tanggal = $request->input('rentang_cuti');
+        $tanggalRange = explode(' - ', $tanggal);
+        if (count($tanggalRange) == 2) {
+            $awal_cuti = $tanggalRange[0];
+            $akhir_cuti = $tanggalRange[1];
+        } else {
+            $awal_cuti = null;
+            $akhir_cuti = null;
+        }
+
+        // $pegawai_id = $request->pegawai_id;
+        // $pegawai_nama = Pegawai::where('id', $pegawai_id)->first();
+
+        dd([
+            'id_pegawai' => $request->pegawai_id,
+            'nama_pegawai' => Pegawai::where('id', $request->pegawai_id)->first()->nama,
+            'nip_pegawai' => $request->pegawai_nip,
+            'id_atasan' => $request->atasan_id,
+            'nama_atasan' => Pegawai::where('nip', $request->atasan_nip)->first()->nama,
+            'nip_atasan' => $request->atasan_nip,
+            'jenis_cuti' => $request->jenis_cuti,
+            'awal_cuti' => $awal_cuti,
+            'akhir_cuti' => $akhir_cuti,
+            'ket_cuti' => $request->keterangan,
+            'status' => 'Diajukan'
+        ]);
     }
 
     /**
