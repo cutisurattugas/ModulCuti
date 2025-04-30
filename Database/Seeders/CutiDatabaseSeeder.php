@@ -17,5 +17,6 @@ class CutiDatabaseSeeder extends Seeder
         Model::unguard();
 
         $this->call(MenuModulCutiTableSeeder::class);
+        $this->call(JenisCutiTableSeeder::class);
     }
 }

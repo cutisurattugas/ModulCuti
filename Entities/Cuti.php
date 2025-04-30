@@ -16,29 +16,35 @@ class Cuti extends Model
 
     protected $table = 'cuti';
     protected $primaryKey = 'id';
-    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dok_pendukung', 'status', 'dok_cuti', 'jenis_cuti_id', 'user_id'];
-    
-    public function jenis_cuti(){
+    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dok_pendukung', 'status', 'dok_cuti', 'pegawai_id', 'pejabat_id', 'unit_id', 'jenis_cuti_id', 'user_id'];
+
+    public function jenis_cuti()
+    {
         return $this->belongsTo(JenisCuti::class, 'jenis_cuti_id', 'id');
     }
 
-    public function pegawai(){
-        return $this->belongsTo(Pegawai::class);
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'pegawai_id', 'id');
     }
 
-    public function pejabat(){
-        return $this->belongsTo(Pejabat::class);
+    public function pejabat()
+    {
+        return $this->belongsTo(Pejabat::class, 'pejabat_id', 'id');
     }
 
-    public function tim_kerja(){
-        return $this->belongsTo(TimKerja::class);
+    public function tim_kerja()
+    {
+        return $this->belongsTo(TimKerja::class, 'tim_kerja_id', 'id');
     }
 
-    public function anggota_tim_kerja(){
+    public function anggota_tim_kerja()
+    {
         return $this->belongsTo(Anggota::class);
     }
 
-    public function unit(){
+    public function unit()
+    {
         return $this->belongsTo(Unit::class);
     }
 }

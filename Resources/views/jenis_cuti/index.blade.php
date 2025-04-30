@@ -42,13 +42,18 @@
                                     <center>{{ $loop->iteration }}</center>
                                 </td>
                                 <td>
-                                    <center>{{ $item->nama_cuti }}</center>
+                                    {{ $item->nama_cuti }}
                                 </td>
                                 <td>
-                                    <center>{{ $item->jumlah_cuti }}</center>
+                                    <center>{{ $item->jumlah_cuti }} hari</center>
                                 </td>
                                 <td>
-                                    <center>{{ Str::limit($item->deskripsi, 20, '...') }}
+                                    <center>
+                                        @if ($item->deskripsi != null)
+                                            {{ Str::limit($item->deskripsi, 20, '...') }}
+                                        @else
+                                            <p>-</p>
+                                        @endif
                                     </center>
                                 </td>
                                 <td>
