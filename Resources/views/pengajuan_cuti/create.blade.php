@@ -38,7 +38,7 @@
                             <table class="table">
                                 <tr>
                                     <td>Nama</td>
-                                    <td>: {{$ketua->pegawai}}</td>
+                                    <td>: {{ $ketua->pegawai->gelar_dpn ?? '' }}{{ $ketua->pegawai->gelar_dpn ? ' ' : '' }}{{ $ketua->pegawai->nama }}{{ $ketua->pegawai->gelar_blk ? ', ' . $ketua->pegawai->gelar_blk : '' }}</td>
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
@@ -56,6 +56,9 @@
             <div class="card">
                 <div class="card-body">
                     <h1>Form Pengajuan Cuti</h1>
+                    <div class="mt-2">
+                        @include('layouts.partials.messages')
+                    </div>
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
@@ -78,15 +81,17 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label for="dok_pendukung" class="form-label">Dokumen Pendukung</label>
+                            <input type="file" class="form-control" name="dok_pendukung" id="dok_pendukung">
+                            <small>*Selain cuti tahunan wajib menyertakan dokumen pendukung!</small>
+                        </div>
+                        <div class="mb-3">
                             <label for="keterangan" class="form-label">Keterangan</label>
                             <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows=""></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="#" class="btn btn-default">Kembali</a>
                     </form>
-                    <div class="mt-2">
-                        @include('layouts.partials.messages')
-                    </div>
                 </div>
             </div>
         </div>

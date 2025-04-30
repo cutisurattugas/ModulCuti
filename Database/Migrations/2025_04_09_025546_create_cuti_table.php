@@ -15,16 +15,17 @@ class CreateCutiTable extends Migration
     {
         Schema::create('cuti', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->string('nip_nik');
-            $table->string('nama_atasan');
-            $table->string('nip_nik_atasan');
             $table->string('tanggal_mulai');
             $table->string('tanggal_selesai');
             $table->text('keterangan');
-            $table->string('dok_pendukung');
+            $table->string('dok_pendukung')->nullable();
             $table->string('status');
-            $table->string('dok_cuti');
+            $table->unsignedBigInteger('pegawai_id');
+            $table->foreign('pegawai_id')->references('id')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('pejabat_id');
+            $table->foreign('pejabat_id')->references('id')->on('pejabat')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('tim_kerja_id');
+            $table->foreign('tim_kerja_id')->references('id')->on('tim_kerja')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('jenis_cuti_id');
             $table->foreign('jenis_cuti_id')->references('id')->on('jenis_cuti')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('user_id');

@@ -46,6 +46,14 @@ class CutiController extends Controller
      */
     public function store(Request $request)
     {
+        // $request->validate([
+        //     'pegawai_id'=> 'required|exists:pegawai,id',
+        //     'atasan_id'=> 'required|exists:pejabat,id',
+        //     'jenis_cuti' => 'required|exists:jenis_cuti,id',
+        //     'rentang_cuti' => 'required',
+        //     'keterangan' => 'required',
+        // ]);
+
         // Explode data rentang cuti
         $tanggal = $request->input('rentang_cuti');
         $tanggalRange = explode(' - ', $tanggal);
@@ -57,21 +65,14 @@ class CutiController extends Controller
             $akhir_cuti = null;
         }
 
-        // $pegawai_id = $request->pegawai_id;
-        // $pegawai_nama = Pegawai::where('id', $pegawai_id)->first();
-
         dd([
-            'id_pegawai' => $request->pegawai_id,
-            'nama_pegawai' => Pegawai::where('id', $request->pegawai_id)->first()->nama,
-            'nip_pegawai' => $request->pegawai_nip,
-            'id_atasan' => $request->atasan_id,
-            'nama_atasan' => Pegawai::where('nip', $request->atasan_nip)->first()->nama,
-            'nip_atasan' => $request->atasan_nip,
+            'pegawai_id' => $request->pegawai_id,
+            'atasan_id' => $request->atasan_id,
             'jenis_cuti' => $request->jenis_cuti,
             'awal_cuti' => $awal_cuti,
             'akhir_cuti' => $akhir_cuti,
-            'ket_cuti' => $request->keterangan,
-            'status' => 'Diajukan'
+            'dok_pendukung' => $request->dok_pendukung,
+            'keterangan' => $request->keterangan,
         ]);
     }
 
