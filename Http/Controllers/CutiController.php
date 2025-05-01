@@ -6,7 +6,9 @@ use App\Models\Core\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Modules\Cuti\Entities\Cuti;
+use Modules\Cuti\Entities\CutiLogs;
 use Modules\Cuti\Entities\JenisCuti;
 use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
@@ -26,11 +28,11 @@ class CutiController extends Controller
         $pegawai_id = optional($pegawai)->id;
         $pejabat = Pejabat::where('pegawai_id', $pegawai_id)->first();
         $pejabat_id = optional($pejabat)->id;
-        
+
         if ($role == 'admin') {
             $cuti = Cuti::latest()->get();
         } elseif ($role == 'operator' && $pejabat_id == 1) {
-            $cuti = Cuti::where('status', "Acc")->latest()->get();
+            $cuti = Cuti::where('status', "diproses")->latest()->get();
         } elseif ($role == 'operator' && $pejabat_id != 1) {
             $pejabat_id = Pejabat::where('pegawai_id', $pegawai_id)->first()->id;
             $cuti = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
@@ -88,6 +90,8 @@ class CutiController extends Controller
             return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
         }
 
+        // Mulai transaksi DB
+        DB::beginTransaction();
         try {
             // Simpan file kedalam storage
             if ($request->hasFile('dok_pendukung')) {
@@ -113,8 +117,20 @@ class CutiController extends Controller
                 'user_id' => auth()->user()->id,
             ]);
 
+            // Insert data ke table cuti_logs
+            CutiLogs::create([
+                'cuti_id' => $data->id,
+                'status' => 'Diajukan',
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            // Commit transaksi jika tidak ada error
+            DB::commit();
+
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diajukan.');
         } catch (\Throwable $th) {
+            // Rollback transaksi jika terjadi error
+            DB::rollBack();
             return redirect()->route('cuti.index')->with('danger', 'Cuti gagal diajukan karena.');
         }
     }
@@ -126,12 +142,22 @@ class CutiController extends Controller
      */
     public function show($id)
     {
+        $user_login = auth()->user();
+        if ($user_login->role_aktif === 'operator') {
+            $id_user_login = auth()->user()->id;
+            $id_pegawai_login = Pegawai::where('user_id', $id_user_login)->first();
+            $id_pejabat_login = Pejabat::where('pegawai_id', $id_pegawai_login->id)->first()->id;
+        } elseif($user_login->role_aktif === 'admin'){
+            $id_pejabat_login = null;
+        }
+
         $cuti = Cuti::findOrFail($id);
         $jenis_cuti = JenisCuti::all();
         $anggota = Anggota::where('pegawai_id', $cuti->pegawai->id)->first();
-        // dd($pegawai);
+        $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
+        $pejabat = Pejabat::where('id', $tim->ketua_id)->first();
 
-        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota'));
+        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota', 'tim', 'pejabat', 'id_pejabat_login'));
     }
 
     /**
@@ -153,6 +179,133 @@ class CutiController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    // Update status cuti oleh admin
+    public function approvedByKepegawaian(Request $request, $id)
+    {
+        // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
+        if (!auth()->user()->role_aktif === 'admin') {
+            return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
+        }
+
+        // Ambil data cuti berdasarkan ID
+        $cuti = Cuti::find($id);
+
+        if (!$cuti) {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
+        }
+
+        // Mulai transaksi DB
+        DB::beginTransaction();
+
+        try {
+            // Perbarui status menjadi "Disetujui Unit Kepegawaian"
+            $cuti->status = 'Diproses';
+            $cuti->save();
+
+            // Tambahkan log status ke tabel cuti_logs
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Telah diteruskan ke atasan',
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            // Commit transaksi jika tidak ada error
+            DB::commit();
+
+            // Redirect ke halaman pengajuan cuti
+            return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke atasan.');
+        } catch (\Throwable $th) {
+            // Rollback jika terjadi error
+            DB::rollBack();
+
+            return redirect()->route('cuti.index')->with('danger', 'Cuti gagal disetujui karena: ' . $th->getMessage());
+        }
+    }
+
+    public function approvedByAtasan(Request $request, $id)
+    {
+        // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
+        if (!auth()->user()->role_aktif === 'operator') {
+            return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
+        }
+
+        // Ambil data cuti berdasarkan ID
+        $cuti = Cuti::find($id);
+
+        if (!$cuti) {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
+        }
+
+        // Mulai transaksi DB
+        DB::beginTransaction();
+
+        try {
+            // Perbarui status menjadi "Disetujui Unit Kepegawaian"
+            $cuti->status = 'Diproses';
+            $cuti->save();
+
+            // Tambahkan log status ke tabel cuti_logs
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Telah diteruskan ke pimpinan',
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            // Commit transaksi jika tidak ada error
+            DB::commit();
+
+            // Redirect ke halaman pengajuan cuti
+            return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke pimpinan.');
+        } catch (\Throwable $th) {
+            // Rollback jika terjadi error
+            DB::rollBack();
+
+            return redirect()->route('cuti.index')->with('danger', 'Cuti gagal disetujui karena: ' . $th->getMessage());
+        }
+    }
+
+    public function approvedByPimpinan(Request $request, $id)
+    {
+        // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
+        if (!auth()->user()->role_aktif === 'operator') {
+            return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
+        }
+
+        // Ambil data cuti berdasarkan ID
+        $cuti = Cuti::find($id);
+
+        if (!$cuti) {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
+        }
+
+        // Mulai transaksi DB
+        DB::beginTransaction();
+
+        try {
+            // Perbarui status menjadi "Disetujui Unit Kepegawaian"
+            $cuti->status = 'Disetujui';
+            $cuti->save();
+
+            // Tambahkan log status ke tabel cuti_logs
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Telah disetujui pimpinan',
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            // Commit transaksi jika tidak ada error
+            DB::commit();
+
+            // Redirect ke halaman pengajuan cuti
+            return redirect()->route('cuti.index')->with('success', 'Cuti telah di setujui.');
+        } catch (\Throwable $th) {
+            // Rollback jika terjadi error
+            DB::rollBack();
+
+            return redirect()->route('cuti.index')->with('danger', 'Cuti gagal disetujui karena: ' . $th->getMessage());
+        }
     }
 
     /**
