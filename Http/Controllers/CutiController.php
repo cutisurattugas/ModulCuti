@@ -2,6 +2,7 @@
 
 namespace Modules\Cuti\Http\Controllers;
 
+use App\Models\Core\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -20,7 +21,28 @@ class CutiController extends Controller
      */
     public function index()
     {
-        $cuti = Cuti::all();
+        $role = auth()->user()->role_aktif;
+        $pegawai = Pegawai::where('username', auth()->user()->username)->first();
+        $pegawai_id = optional($pegawai)->id;
+        $pejabat = Pejabat::where('pegawai_id', $pegawai_id)->first();
+        $pejabat_id = optional($pejabat)->id;
+        
+        if ($role == 'admin') {
+            $cuti = Cuti::latest()->get();
+        } elseif ($role == 'operator' && $pejabat_id == 1) {
+            $cuti = Cuti::where('status', "Acc")->latest()->get();
+        } elseif ($role == 'operator' && $pejabat_id != 1) {
+            $pejabat_id = Pejabat::where('pegawai_id', $pegawai_id)->first()->id;
+            $cuti = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
+            $statuses = $cuti->pluck('status');
+            if ($statuses->contains('Diproses')) {
+                $cuti;
+            } else {
+                $cuti = null;
+            }
+        } elseif ($role == 'terdaftar') {
+            $cuti = Cuti::where('pegawai_id', $pegawai_id)->latest()->get();
+        }
         return view('cuti::pengajuan_cuti.index', compact('cuti'));
     }
 
@@ -35,7 +57,7 @@ class CutiController extends Controller
         $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
         $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
         $ketua = Pejabat::where('id', $tim->ketua_id)->first();
-        // dd($ketua);
+
         return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua'));
     }
 
@@ -46,13 +68,15 @@ class CutiController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'pegawai_id'=> 'required|exists:pegawai,id',
-        //     'atasan_id'=> 'required|exists:pejabat,id',
-        //     'jenis_cuti' => 'required|exists:jenis_cuti,id',
-        //     'rentang_cuti' => 'required',
-        //     'keterangan' => 'required',
-        // ]);
+        // Validasi inputan
+        $request->validate([
+            'pegawai_id' => 'required|exists:pegawai,id',
+            'atasan_id' => 'required|exists:pejabat,id',
+            'jenis_cuti' => 'required|exists:jenis_cuti,id',
+            'rentang_cuti' => 'required',
+            'dok_pendukung' => 'nullable|file|mimes:pdf|max:2048',
+            'keterangan' => 'required',
+        ]);
 
         // Explode data rentang cuti
         $tanggal = $request->input('rentang_cuti');
@@ -60,20 +84,39 @@ class CutiController extends Controller
         if (count($tanggalRange) == 2) {
             $awal_cuti = $tanggalRange[0];
             $akhir_cuti = $tanggalRange[1];
-        } else {
-            $awal_cuti = null;
-            $akhir_cuti = null;
+        } elseif (count($tanggalRange) !== 2) {
+            return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
         }
 
-        dd([
-            'pegawai_id' => $request->pegawai_id,
-            'atasan_id' => $request->atasan_id,
-            'jenis_cuti' => $request->jenis_cuti,
-            'awal_cuti' => $awal_cuti,
-            'akhir_cuti' => $akhir_cuti,
-            'dok_pendukung' => $request->dok_pendukung,
-            'keterangan' => $request->keterangan,
-        ]);
+        try {
+            // Simpan file kedalam storage
+            if ($request->hasFile('dok_pendukung')) {
+                $file = $request->file('dok_pendukung');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('public/uploads/dok_pendukung', $fileName);
+                $dokPendukungPath = 'uploads/dok_pendukung/' . $fileName;
+            } else {
+                $dokPendukungPath = null;
+            }
+
+            // Insert data ke tabel cuti
+            $data = Cuti::create([
+                'tanggal_mulai' => $awal_cuti,
+                'tanggal_selesai' => $akhir_cuti,
+                'keterangan' => $request->keterangan,
+                'dok_pendukung' => $dokPendukungPath,
+                'status' => 'Diajukan',
+                'pegawai_id' => $request->pegawai_id,
+                'pejabat_id' => $request->atasan_id,
+                'tim_kerja_id' => $request->tim_kerja_id,
+                'jenis_cuti_id' => $request->jenis_cuti,
+                'user_id' => auth()->user()->id,
+            ]);
+
+            return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diajukan.');
+        } catch (\Throwable $th) {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti gagal diajukan karena.');
+        }
     }
 
     /**
@@ -83,7 +126,12 @@ class CutiController extends Controller
      */
     public function show($id)
     {
-        return view('cuti::show');
+        $cuti = Cuti::findOrFail($id);
+        $jenis_cuti = JenisCuti::all();
+        $anggota = Anggota::where('pegawai_id', $cuti->pegawai->id)->first();
+        // dd($pegawai);
+
+        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota'));
     }
 
     /**

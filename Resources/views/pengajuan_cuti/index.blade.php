@@ -11,7 +11,9 @@
                     <h1>Cuti</h1>
                     <div class="lead">
                         Manaje pengajuan cuti.
-                        <a href="{{route('cuti.create')}}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
+                        @if (auth()->user()->role_aktif === 'terdaftar')
+                            <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
+                        @endif
                     </div>
 
                     <div class="mt-2">
@@ -21,6 +23,9 @@
                     <table class="table table-bordered">
                         <tr>
                             <th width="1%">No</th>
+                            <th>
+                                <center>Nama</center>
+                            </th>
                             <th>
                                 <center>Tanggal Awal</center>
                             </th>
@@ -33,40 +38,59 @@
                             <th>
                                 <center>Status</center>
                             </th>
-                            <th>
+                            <th colspan="3">
                                 <center>Opsi</center>
                             </th>
                         </tr>
-                        @foreach ($cuti as $cuti)
-                        <tr>
-                            <td>
-                                <center>{{ $loop->iteration }}</center>
-                            </td>
-                            <td>
-                                <center>{{$cuti->tanggal_mulai}}</center>
-                            </td>
-                            <td>
-                                <center>{{$cuti->tanggal_selesai}}</center>
-                            </td>
-                            <td>
-                                <center>{{$cuti->jenis_cuti->nama_cuti}}</center>
-                            </td>
-                            <td>
-                                <center>
-                                    <span class="badge rounded-pill bg-info">
-                                        {{$cuti->status}}
-                                    </span>
-                                </center>
-                            </td>
-                            <td>
-                                <center>
-                                    <a class="btn btn-warning btn-sm" href="#">
-                                        <i class="nav-icon fas fa-edit"></i>
-                                    </a>
-                                </center>
-                            </td>
-                        </tr>
-                        @endforeach
+                        @if ($cuti != null)
+                            @foreach ($cuti as $item)
+                                <tr>
+                                    <td>
+                                        <center>{{ $loop->iteration }}</center>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }}
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>{{ date('d M Y', strtotime($item->tanggal_selesai)) }}
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>{{ $item->jenis_cuti->nama_cuti }}</center>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            <span class="badge rounded-pill bg-info">
+                                                {{ $item->status }}
+                                            </span>
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            <a class="btn btn-warning btn-sm" href="#">
+                                                <i class="nav-icon fas fa-edit"></i>
+                                            </a>
+                                            <a class="btn btn-danger btn-sm" href="#">
+                                                <i class="nav-icon fas fa-trash"></i>
+                                            </a>
+                                            <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}">
+                                                <i class="nav-icon fas fa-eye"></i>
+                                            </a>
+                                        </center>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="7" class="text-center">Belum ada data cuti</td>
+                            </tr>
+                        @endif
                     </table>
 
                     <div class="d-flex">
