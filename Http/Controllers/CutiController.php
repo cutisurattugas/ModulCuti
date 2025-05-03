@@ -3,6 +3,7 @@
 namespace Modules\Cuti\Http\Controllers;
 
 use App\Models\Core\User;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -60,7 +61,22 @@ class CutiController extends Controller
         $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
         $ketua = Pejabat::where('id', $tim->ketua_id)->first();
 
-        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua'));
+        // Menghitung sisa cuti
+        $jatah_cuti = JenisCuti::where('id', 1)->first()->jumlah_cuti;
+        $cuti_diambil = Cuti::where('user_id', auth()->user()->id)
+            ->where('jenis_cuti_id', 1)
+            ->where('status', 'Disetujui')
+            ->get();
+
+        $total_cuti_diambil = $cuti_diambil->reduce(function ($carry, $cuti) {
+            $mulai = Carbon::parse($cuti->tanggal_mulai);
+            $selesai = Carbon::parse($cuti->tanggal_selesai);
+            $jumlah_hari = $mulai->diffInDays($selesai) + 1; // +1 karena hari mulai dan selesai dihitung
+            return $carry + $jumlah_hari;
+        }, 0);
+
+        $sisa_cuti = $jatah_cuti - $total_cuti_diambil;
+        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua', 'sisa_cuti'));
     }
 
     /**
@@ -147,7 +163,7 @@ class CutiController extends Controller
             $id_user_login = auth()->user()->id;
             $id_pegawai_login = Pegawai::where('user_id', $id_user_login)->first();
             $id_pejabat_login = Pejabat::where('pegawai_id', $id_pegawai_login->id)->first()->id;
-        } elseif($user_login->role_aktif === 'admin'){
+        } elseif ($user_login->role_aktif === 'admin') {
             $id_pejabat_login = null;
         }
 

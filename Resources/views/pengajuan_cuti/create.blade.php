@@ -18,15 +18,25 @@
                             <table class="table">
                                 <tr>
                                     <td>Nama</td>
-                                    <td>: {{ $pegawai->gelar_dpn ?? '' }}{{ $pegawai->gelar_dpn ? ' ' : '' }}{{ $pegawai->nama }}{{ $pegawai->gelar_blk ? ', ' . $pegawai->gelar_blk : '' }}</td>
+                                    <td>:
+                                        {{ $pegawai->gelar_dpn ?? '' }}{{ $pegawai->gelar_dpn ? ' ' : '' }}{{ $pegawai->nama }}{{ $pegawai->gelar_blk ? ', ' . $pegawai->gelar_blk : '' }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
-                                    <td>: {{$pegawai->nip}}</td>
+                                    <td>: {{ $pegawai->nip }}</td>
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: {{$tim->unit->nama}}</td>
+                                    <td>: {{ $tim->unit->nama }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Sisa Cuti Tahunan</td>
+                                    <td>:
+                                        <span class="badge rounded-pill bg-warning">
+                                            {{ $sisa_cuti }}
+                                        </span>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
@@ -38,15 +48,17 @@
                             <table class="table">
                                 <tr>
                                     <td>Nama</td>
-                                    <td>: {{ $ketua->pegawai->gelar_dpn ?? '' }}{{ $ketua->pegawai->gelar_dpn ? ' ' : '' }}{{ $ketua->pegawai->nama }}{{ $ketua->pegawai->gelar_blk ? ', ' . $ketua->pegawai->gelar_blk : '' }}</td>
+                                    <td>:
+                                        {{ $ketua->pegawai->gelar_dpn ?? '' }}{{ $ketua->pegawai->gelar_dpn ? ' ' : '' }}{{ $ketua->pegawai->nama }}{{ $ketua->pegawai->gelar_blk ? ', ' . $ketua->pegawai->gelar_blk : '' }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
-                                    <td>: {{$ketua->nip}}</td>
+                                    <td>: {{ $ketua->nip }}</td>
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: {{$tim->unit->nama}}</td>
+                                    <td>: {{ $tim->unit->nama }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -62,9 +74,9 @@
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
-                            <input type="hidden" name="pegawai_id" value="{{$pegawai->id}}">
-                            <input type="hidden" name="atasan_id" value="{{$ketua->id}}">
-                            <input type="hidden" name="tim_kerja_id" value="{{$tim->id}}">
+                            <input type="hidden" name="pegawai_id" value="{{ $pegawai->id }}">
+                            <input type="hidden" name="atasan_id" value="{{ $ketua->id }}">
+                            <input type="hidden" name="tim_kerja_id" value="{{ $tim->id }}">
                             <div class="col-md-6">
                                 <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
                                 <select class="form-control" name="jenis_cuti" id="jenis_cuti">
