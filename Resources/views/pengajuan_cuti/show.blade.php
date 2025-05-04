@@ -30,6 +30,14 @@
                                     <td>Unit Kerja</td>
                                     <td>: {{ $anggota->timKerja->unit->nama }}</td>
                                 </tr>
+                                <tr>
+                                    <td>Sisa Cuti Tahunan</td>
+                                    <td>:
+                                        <span class="badge rounded-pill bg-warning">
+                                            {{ $sisa_cuti }}
+                                        </span>
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                         <!-- Identitas Atasan -->

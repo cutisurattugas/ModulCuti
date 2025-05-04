@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\CutiLogs;
 use Modules\Cuti\Entities\JenisCuti;
+use Modules\Cuti\Services\SisaCutiService;
 use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
@@ -62,20 +63,9 @@ class CutiController extends Controller
         $ketua = Pejabat::where('id', $tim->ketua_id)->first();
 
         // Menghitung sisa cuti
-        $jatah_cuti = JenisCuti::where('id', 1)->first()->jumlah_cuti;
-        $cuti_diambil = Cuti::where('user_id', auth()->user()->id)
-            ->where('jenis_cuti_id', 1)
-            ->where('status', 'Disetujui')
-            ->get();
+        $sisaCutiService = new SisaCutiService();
+        $sisa_cuti = $sisaCutiService->hitung(auth()->user()->id);
 
-        $total_cuti_diambil = $cuti_diambil->reduce(function ($carry, $cuti) {
-            $mulai = Carbon::parse($cuti->tanggal_mulai);
-            $selesai = Carbon::parse($cuti->tanggal_selesai);
-            $jumlah_hari = $mulai->diffInDays($selesai) + 1; // +1 karena hari mulai dan selesai dihitung
-            return $carry + $jumlah_hari;
-        }, 0);
-
-        $sisa_cuti = $jatah_cuti - $total_cuti_diambil;
         return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua', 'sisa_cuti'));
     }
 
@@ -168,12 +158,15 @@ class CutiController extends Controller
         }
 
         $cuti = Cuti::findOrFail($id);
+        $sisaCutiService = new SisaCutiService();
+        $sisa_cuti = $sisaCutiService->hitung($cuti->user_id);
+
         $jenis_cuti = JenisCuti::all();
         $anggota = Anggota::where('pegawai_id', $cuti->pegawai->id)->first();
         $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
         $pejabat = Pejabat::where('id', $tim->ketua_id)->first();
 
-        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota', 'tim', 'pejabat', 'id_pejabat_login'));
+        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota', 'tim', 'pejabat', 'id_pejabat_login', 'sisa_cuti'));
     }
 
     /**
