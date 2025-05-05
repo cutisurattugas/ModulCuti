@@ -11,9 +11,9 @@
                     <h1>Cuti</h1>
                     <div class="lead">
                         Manaje pengajuan cuti.
-                        @if (auth()->user()->role_aktif === 'terdaftar')
+                        {{-- @if (auth()->user()->role_aktif === 'terdaftar' && auth()->user()->role_aktif === 'operator') --}}
                             <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
-                        @endif
+                        {{-- @endif --}}
                     </div>
 
                     <div class="mt-2">

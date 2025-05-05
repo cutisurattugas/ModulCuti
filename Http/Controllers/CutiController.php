@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\CutiLogs;
 use Modules\Cuti\Entities\JenisCuti;
+use Modules\Cuti\Services\AtasanService;
 use Modules\Cuti\Services\SisaCutiService;
 use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
@@ -58,16 +59,28 @@ class CutiController extends Controller
     {
         $jenis_cuti = JenisCuti::all();
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
+
         $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
-        $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
-        $ketua = Pejabat::where('id', $tim->ketua_id)->first();
+        $tim = TimKerja::find($anggota->tim_kerja_id ?? null); // jika ada
 
-        // Menghitung sisa cuti
+        // Gunakan AtasanService
+        $atasanService = new AtasanService();
+        $ketua = $atasanService->getAtasanPegawai($pegawai->id);
+
+        // Hitung sisa cuti
         $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung(auth()->user()->id);
-
-        return view('cuti::pengajuan_cuti.create', compact('jenis_cuti', 'pegawai', 'tim', 'anggota', 'ketua', 'sisa_cuti'));
+        $sisa_cuti = $sisaCutiService->hitung($pegawai->id);
+        // dd($ketua);
+        return view('cuti::pengajuan_cuti.create', compact(
+            'jenis_cuti',
+            'pegawai',
+            'tim',
+            'anggota',
+            'ketua',
+            'sisa_cuti'
+        ));
     }
+
 
     /**
      * Store a newly created resource in storage.
