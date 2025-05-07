@@ -98,7 +98,7 @@ class CutiController extends Controller
             'atasan_id' => 'required|exists:pejabat,id',
             'jenis_cuti' => 'required|exists:jenis_cuti,id',
             'rentang_cuti' => 'required',
-            'dok_pendukung' => 'nullable|file|mimes:pdf|max:2048',
+            'dok_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'keterangan' => 'required',
         ]);
 
@@ -143,7 +143,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $data->id,
                 'status' => 'Diajukan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->username,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -249,7 +249,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah diteruskan ke atasan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->username,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -291,7 +291,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah diteruskan ke pimpinan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->username,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -333,7 +333,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah disetujui pimpinan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->username,
             ]);
 
             // Commit transaksi jika tidak ada error
