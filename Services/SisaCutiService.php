@@ -8,11 +8,11 @@ use Modules\Cuti\Entities\JenisCuti;
 
 class SisaCutiService
 {
-    public function hitung($user_id, $jenis_cuti_id = 1)
+    public function hitung($pegawai_username, $jenis_cuti_id = 1)
     {
         $jatah_cuti = JenisCuti::find($jenis_cuti_id)?->jumlah_cuti ?? 0;
 
-        $cuti_diambil = Cuti::where('user_id', $user_id)
+        $cuti_diambil = Cuti::where('pegawai_username', $pegawai_username)
             ->where('jenis_cuti_id', $jenis_cuti_id)
             ->where('status', 'Disetujui')
             ->get();

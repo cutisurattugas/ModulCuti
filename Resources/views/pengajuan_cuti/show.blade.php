@@ -86,7 +86,7 @@
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: {{ $ketua->unit->nama ?? '-' }}</td>
+                                    <td>: {{ $pejabat->unit->nama ?? '-' }}</td>
                                 </tr>
                             </table>
                         </div>

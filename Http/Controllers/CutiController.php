@@ -41,7 +41,7 @@ class CutiController extends Controller
             $cuti = Cuti::latest()->get();
         } elseif ($role == 'operator' && $pejabat_id == 1) {
             // Operator pusat bisa lihat semua yang sedang diproses
-            $cuti = Cuti::where('status', "diproses")->latest()->get();
+            $cuti = Cuti::latest()->get();
         } elseif ($role == 'operator' && $pejabat_id != 1) {
             // Atasan (operator bukan pusat)
             $cuti_anggota = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
@@ -71,7 +71,7 @@ class CutiController extends Controller
 
         // Hitung sisa cuti
         $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung($pegawai->user_id);
+        $sisa_cuti = $sisaCutiService->hitung($pegawai->username);
 
         // dd($sisa_cuti);
         return view('cuti::pengajuan_cuti.create', compact(
@@ -136,7 +136,6 @@ class CutiController extends Controller
                 'pejabat_id' => $request->atasan_id,
                 'tim_kerja_id' => $request->tim_kerja_id,
                 'jenis_cuti_id' => $request->jenis_cuti,
-                'user_id' => auth()->user()->id,
             ]);
 
             // Insert data ke table cuti_logs
@@ -169,12 +168,12 @@ class CutiController extends Controller
         // Ambil ID pejabat login (jika operator)
         $id_pejabat_login = null;
         if ($user_login->role_aktif === 'operator') {
-            $id_user_login = $user_login->id;
-            $pegawai_login = Pegawai::where('user_id', $id_user_login)->first();
+            $username_user_login = $user_login->username;
+            $pegawai_login = Pegawai::where('username', $username_user_login)->first();
             $pejabat_login = Pejabat::where('pegawai_username', $pegawai_login->username)->first();
             $id_pejabat_login = optional($pejabat_login)->id;
         }
-
+        // dd($pejabat_login);
         $cuti = Cuti::findOrFail($id);
 
         // Ambil data atasan yang benar via service
@@ -183,7 +182,7 @@ class CutiController extends Controller
 
         // Sisa cuti
         $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung($cuti->user_id);
+        $sisa_cuti = $sisaCutiService->hitung($cuti->username);
 
         // Tambahan data lain
         $jenis_cuti = JenisCuti::all();
