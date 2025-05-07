@@ -38,6 +38,34 @@
                                         </span>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Status Pengajuan</td>
+                                    <td>:
+                                        @php
+                                            $status = $cuti->status;
+                                            switch ($status) {
+                                                case 'Diajukan':
+                                                    $badgeClass = 'primary';
+                                                    break;
+                                                case 'Diproses':
+                                                    $badgeClass = 'info';
+                                                    break;
+                                                case 'Disetujui':
+                                                    $badgeClass = 'success';
+                                                    break;
+                                                case 'Ditolak':
+                                                    $badgeClass = 'danger';
+                                                    break;
+                                                case 'Dibatalkan':
+                                                    $badgeClass = 'secondary';
+                                                    break;
+                                                default:
+                                                    $badgeClass = 'light';
+                                            }
+                                        @endphp
+                                        <span class="badge rounded-pill bg-{{ $badgeClass }}">{{ $status }}</span>
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                         <!-- Identitas Atasan -->

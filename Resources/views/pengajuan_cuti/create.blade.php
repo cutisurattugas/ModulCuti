@@ -93,7 +93,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="dok_pendukung" class="form-label">Dokumen Pendukung</label>
-                            <input type="file" class="form-control" name="dok_pendukung" id="dok_pendukung">
+                            <input type="file" class="form-control" name="dok_pendukung" id="dok_pendukung" accept=".pdf, image/*">
                             <small>*Selain cuti tahunan wajib menyertakan dokumen pendukung!</small>
                         </div>
                         <div class="mb-3">
