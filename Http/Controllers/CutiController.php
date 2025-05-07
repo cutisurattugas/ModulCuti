@@ -28,27 +28,29 @@ class CutiController extends Controller
     {
         $role = auth()->user()->role_aktif;
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
-        $pegawai_id = optional($pegawai)->id;
-        $pejabat = Pejabat::where('pegawai_id', $pegawai_id)->first();
+        $pegawai_username = optional($pegawai)->username;
+        $pejabat = Pejabat::where('pegawai_username', $pegawai_username)->first();
         $pejabat_id = optional($pejabat)->id;
 
+        $cuti = null;
+        $cuti_pribadi = null;
+        $cuti_anggota = null;
+
         if ($role == 'admin') {
+            // Admin bisa lihat semua cuti
             $cuti = Cuti::latest()->get();
         } elseif ($role == 'operator' && $pejabat_id == 1) {
+            // Operator pusat bisa lihat semua yang sedang diproses
             $cuti = Cuti::where('status', "diproses")->latest()->get();
         } elseif ($role == 'operator' && $pejabat_id != 1) {
-            $pejabat_id = Pejabat::where('pegawai_id', $pegawai_id)->first()->id;
-            $cuti = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
-            $statuses = $cuti->pluck('status');
-            if ($statuses->contains('Diproses')) {
-                $cuti;
-            } else {
-                $cuti = null;
-            }
+            // Atasan (operator bukan pusat)
+            $cuti_anggota = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
+            $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
         } elseif ($role == 'terdaftar') {
-            $cuti = Cuti::where('pegawai_id', $pegawai_id)->latest()->get();
+            // Pegawai biasa hanya bisa lihat cuti dirinya sendiri
+            $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
         }
-        return view('cuti::pengajuan_cuti.index', compact('cuti'));
+        return view('cuti::pengajuan_cuti.index', compact('cuti', 'cuti_pribadi', 'cuti_anggota'));
     }
 
     /**
@@ -60,17 +62,18 @@ class CutiController extends Controller
         $jenis_cuti = JenisCuti::all();
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
 
-        $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
+        $anggota = Anggota::where('pegawai_username', $pegawai->username)->first();
         $tim = TimKerja::find($anggota->tim_kerja_id ?? null); // jika ada
 
         // Gunakan AtasanService
         $atasanService = new AtasanService();
-        $ketua = $atasanService->getAtasanPegawai($pegawai->id);
+        $ketua = $atasanService->getAtasanPegawai($pegawai->username);
 
         // Hitung sisa cuti
         $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung($pegawai->id);
-        // dd($ketua);
+        $sisa_cuti = $sisaCutiService->hitung($pegawai->user_id);
+
+        // dd($sisa_cuti);
         return view('cuti::pengajuan_cuti.create', compact(
             'jenis_cuti',
             'pegawai',
@@ -91,7 +94,7 @@ class CutiController extends Controller
     {
         // Validasi inputan
         $request->validate([
-            'pegawai_id' => 'required|exists:pegawai,id',
+            'pegawai_username' => 'required|exists:pegawai,username',
             'atasan_id' => 'required|exists:pejabat,id',
             'jenis_cuti' => 'required|exists:jenis_cuti,id',
             'rentang_cuti' => 'required',
@@ -129,7 +132,7 @@ class CutiController extends Controller
                 'keterangan' => $request->keterangan,
                 'dok_pendukung' => $dokPendukungPath,
                 'status' => 'Diajukan',
-                'pegawai_id' => $request->pegawai_id,
+                'pegawai_username' => $request->pegawai_username,
                 'pejabat_id' => $request->atasan_id,
                 'tim_kerja_id' => $request->tim_kerja_id,
                 'jenis_cuti_id' => $request->jenis_cuti,
@@ -162,24 +165,40 @@ class CutiController extends Controller
     public function show($id)
     {
         $user_login = auth()->user();
+
+        // Ambil ID pejabat login (jika operator)
+        $id_pejabat_login = null;
         if ($user_login->role_aktif === 'operator') {
-            $id_user_login = auth()->user()->id;
-            $id_pegawai_login = Pegawai::where('user_id', $id_user_login)->first();
-            $id_pejabat_login = Pejabat::where('pegawai_id', $id_pegawai_login->id)->first()->id;
-        } elseif ($user_login->role_aktif === 'admin') {
-            $id_pejabat_login = null;
+            $id_user_login = $user_login->id;
+            $pegawai_login = Pegawai::where('user_id', $id_user_login)->first();
+            $pejabat_login = Pejabat::where('pegawai_username', $pegawai_login->username)->first();
+            $id_pejabat_login = optional($pejabat_login)->id;
         }
 
         $cuti = Cuti::findOrFail($id);
+
+        // Ambil data atasan yang benar via service
+        $atasanService = new AtasanService();
+        $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->username); // ⬅️ Ini yang diganti
+
+        // Sisa cuti
         $sisaCutiService = new SisaCutiService();
         $sisa_cuti = $sisaCutiService->hitung($cuti->user_id);
 
+        // Tambahan data lain
         $jenis_cuti = JenisCuti::all();
-        $anggota = Anggota::where('pegawai_id', $cuti->pegawai->id)->first();
-        $tim = TimKerja::where('id', $anggota->tim_kerja_id)->first();
-        $pejabat = Pejabat::where('id', $tim->ketua_id)->first();
+        $anggota = Anggota::where('pegawai_username', $cuti->pegawai->username)->first();
+        $tim = TimKerja::find(optional($anggota)->tim_kerja_id);
 
-        return view('cuti::pengajuan_cuti.show', compact('jenis_cuti', 'cuti', 'anggota', 'tim', 'pejabat', 'id_pejabat_login', 'sisa_cuti'));
+        return view('cuti::pengajuan_cuti.show', compact(
+            'jenis_cuti',
+            'cuti',
+            'anggota',
+            'tim',
+            'pejabat',
+            'id_pejabat_login',
+            'sisa_cuti'
+        ));
     }
 
     /**

@@ -20,8 +20,8 @@ class CreateCutiTable extends Migration
             $table->text('keterangan');
             $table->string('dok_pendukung')->nullable();
             $table->string('status');
-            $table->unsignedBigInteger('pegawai_id');
-            $table->foreign('pegawai_id')->references('id')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('pegawai_username');
+            $table->foreign('pegawai_username')->references('username')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('pejabat_id');
             $table->foreign('pejabat_id')->references('id')->on('pejabat')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('tim_kerja_id');

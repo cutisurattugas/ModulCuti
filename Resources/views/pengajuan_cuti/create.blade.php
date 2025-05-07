@@ -54,11 +54,11 @@
                                 </tr>
                                 <tr>
                                     <td>NIP/NIPPK</td>
-                                    <td>: {{ $ketua->nip }}</td>
+                                    <td>: {{ $ketua->pegawai->nip }}</td>
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: {{ $ketua->unit->nama }}</td>
+                                    <td>: {{ $ketua->unit->nama ?? '-' }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -74,7 +74,7 @@
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
-                            <input type="hidden" name="pegawai_id" value="{{ $pegawai->id }}">
+                            <input type="hidden" name="pegawai_username" value="{{ $pegawai->username }}">
                             <input type="hidden" name="atasan_id" value="{{ $ketua->id }}">
                             <input type="hidden" name="tim_kerja_id" value="{{ $tim->id }}">
                             <div class="col-md-6">

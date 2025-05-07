@@ -31,7 +31,7 @@ class MenuModulCutiTableSeeder extends Seeder
         if ($menu) {
             Menu::create([
                 'modul' => 'Cuti',
-                'label' => 'Cuti',
+                'label' => 'Pengajuan Cuti',
                 'url' => 'cuti/pengajuan',
                 'can' => serialize(['admin']),
                 'icon' => 'far fa-circle',
