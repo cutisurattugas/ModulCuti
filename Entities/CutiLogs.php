@@ -5,6 +5,7 @@ namespace Modules\Cuti\Entities;
 use App\Models\Core\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Pengaturan\Entities\Pegawai;
 
 class CutiLogs extends Model
 {
@@ -17,7 +18,7 @@ class CutiLogs extends Model
     public function cuti(){
         return $this->belongsTo(Cuti::class, 'cuti_id', 'id');
     }
-    public function user(){
-        return $this->belongsTo(User::class, 'updated_by', 'id');
+    public function pegawai(){
+        return $this->belongsTo(Pegawai::class, 'updated_by', 'username');
     }
 }
