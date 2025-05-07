@@ -11,87 +11,64 @@
                     <h1>Cuti</h1>
                     <div class="lead">
                         Manaje pengajuan cuti.
-                        {{-- @if (auth()->user()->role_aktif === 'terdaftar' && auth()->user()->role_aktif === 'operator') --}}
+                        @if (auth()->user()->role_aktif === 'terdaftar' || auth()->user()->role_aktif === 'operator')
                             <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
-                        {{-- @endif --}}
+                        @endif
                     </div>
 
                     <div class="mt-2">
                         @include('layouts.partials.messages')
                     </div>
 
-                    <table class="table table-bordered">
-                        <tr>
-                            <th width="1%">No</th>
-                            <th>
-                                <center>Nama</center>
-                            </th>
-                            <th>
-                                <center>Tanggal Awal</center>
-                            </th>
-                            <th>
-                                <center>Tanggal Selesai</center>
-                            </th>
-                            <th>
-                                <center>Jenis</center>
-                            </th>
-                            <th>
-                                <center>Status</center>
-                            </th>
-                            <th colspan="3">
-                                <center>Opsi</center>
-                            </th>
-                        </tr>
-                        @if ($cuti != null)
-                            @foreach ($cuti as $item)
-                                <tr>
-                                    <td>
-                                        <center>{{ $loop->iteration }}</center>
-                                    </td>
-                                    <td>
-                                        <center>
-                                            {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
-                                        </center>
-                                    </td>
-                                    <td>
-                                        <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }}
-                                        </center>
-                                    </td>
-                                    <td>
-                                        <center>{{ date('d M Y', strtotime($item->tanggal_selesai)) }}
-                                        </center>
-                                    </td>
-                                    <td>
-                                        <center>{{ $item->jenis_cuti->nama_cuti }}</center>
-                                    </td>
-                                    <td>
-                                        <center>
-                                            <span class="badge rounded-pill bg-info">
-                                                {{ $item->status }}
-                                            </span>
-                                        </center>
-                                    </td>
-                                    <td>
-                                        <center>
-                                            <a class="btn btn-warning btn-sm" href="#">
-                                                <i class="nav-icon fas fa-edit"></i>
-                                            </a>
-                                            <a class="btn btn-danger btn-sm" href="#">
-                                                <i class="nav-icon fas fa-trash"></i>
-                                            </a>
-                                            <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}">
-                                                <i class="nav-icon fas fa-eye"></i>
-                                            </a>
-                                        </center>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @else
-                            <tr>
-                                <td colspan="7" class="text-center">Belum ada data cuti</td>
-                            </tr>
+                    <ul class="nav nav-tabs mb-3" id="cutiTab" role="tablist">
+                        @if ($cuti_pribadi)
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="pribadi-tab" data-bs-toggle="tab"
+                                    data-bs-target="#pribadi" type="button" role="tab">Cuti Pribadi</button>
+                            </li>
                         @endif
-                    </table>
+                        @if ($cuti_anggota)
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {{ !$cuti_pribadi ? 'active' : '' }}" id="anggota-tab"
+                                    data-bs-toggle="tab" data-bs-target="#anggota" type="button" role="tab">Cuti
+                                    Anggota</button>
+                            </li>
+                        @endif
+                        @if ($cuti)
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {{ !$cuti_pribadi && !$cuti_anggota ? 'active' : '' }}"
+                                    id="semua-tab" data-bs-toggle="tab" data-bs-target="#semua" type="button"
+                                    role="tab">Semua Cuti</button>
+                            </li>
+                        @endif
+                    </ul>
+
+                    <div class="tab-content" id="cutiTabContent">
+                        @if ($cuti_pribadi)
+                            <div class="tab-pane fade show active" id="pribadi" role="tabpanel">
+                                @include('cuti::pengajuan_cuti.components.tabel', [
+                                    'cuti_data' => $cuti_pribadi,
+                                ])
+                            </div>
+                        @endif
+
+                        @if ($cuti_anggota)
+                            <div class="tab-pane fade {{ !$cuti_pribadi ? 'show active' : '' }}" id="anggota"
+                                role="tabpanel">
+                                @include('cuti::pengajuan_cuti.components.tabel', [
+                                    'cuti_data' => $cuti_anggota,
+                                ])
+                            </div>
+                        @endif
+
+                        @if ($cuti)
+                            <div class="tab-pane fade {{ !$cuti_pribadi && !$cuti_anggota ? 'show active' : '' }}"
+                                id="semua" role="tabpanel">
+                                @include('cuti::pengajuan_cuti.components.tabel', ['cuti_data' => $cuti])
+                            </div>
+                        @endif
+                    </div>
+
 
                     <div class="d-flex">
                         {{-- {!! $cuti->links('pagination::bootstrap-4') !!} --}}
@@ -102,3 +79,6 @@
         </div>
     </div>
 @stop
+@section('adminlte_js')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@endsection

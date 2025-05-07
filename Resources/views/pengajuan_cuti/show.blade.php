@@ -58,7 +58,7 @@
                                 </tr>
                                 <tr>
                                     <td>Unit Kerja</td>
-                                    <td>: {{ $anggota->timKerja->unit->nama }}</td>
+                                    <td>: {{ $ketua->unit->nama ?? '-' }}</td>
                                 </tr>
                             </table>
                         </div>
