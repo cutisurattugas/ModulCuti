@@ -8,6 +8,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\CutiLogs;
 use Modules\Cuti\Entities\JenisCuti;
@@ -31,7 +32,7 @@ class CutiController extends Controller
         $pegawai_username = optional($pegawai)->username;
         $pejabat = Pejabat::where('pegawai_username', $pegawai_username)->first();
         $pejabat_id = optional($pejabat)->id;
-        
+
         $cuti = null;
         $cuti_pribadi = null;
         $cuti_anggota = null;
@@ -51,7 +52,7 @@ class CutiController extends Controller
                     ->whereHas('logs', function ($query) {
                         $query->where('status', 'Telah diteruskan ke atasan');
                     })->latest()->get();
-    
+
                 // Cuti pribadi tetap bisa dilihat
                 $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
             }
@@ -59,7 +60,7 @@ class CutiController extends Controller
             // Pegawai biasa hanya bisa lihat cuti dirinya sendiri
             $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
         }
-        return view('cuti::pengajuan_cuti.index', compact('cuti', 'cuti_pribadi', 'cuti_anggota'));
+        return view('cuti::pengajuan_cuti.index', compact('cuti', 'cuti_pribadi', 'cuti_anggota', 'pejabat_id'));
     }
 
     /**
@@ -219,7 +220,42 @@ class CutiController extends Controller
      */
     public function edit($id)
     {
-        return view('cuti::edit');
+        $user_login = auth()->user();
+
+        // Ambil ID pejabat login (jika operator)
+        $id_pejabat_login = null;
+        if ($user_login->role_aktif === 'operator') {
+            $username_user_login = $user_login->username;
+            $pegawai_login = Pegawai::where('username', $username_user_login)->first();
+            $pejabat_login = Pejabat::where('pegawai_username', $pegawai_login->username)->first();
+            $id_pejabat_login = optional($pejabat_login)->id;
+        }
+        // dd($pejabat_login);
+        $cuti = Cuti::findOrFail($id);
+
+        // Ambil data atasan yang benar via service
+        $atasanService = new AtasanService();
+        $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->username);
+
+        // Ambil data sisa cuti tahun ini
+        $ambilCuti = DB::table('cuti_sisa')->where('pegawai_username', $cuti->pegawai_username)->where('tahun', Carbon::now()->year)->first();
+
+        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa;
+
+        // Tambahan data lain
+        $jenis_cuti = JenisCuti::all();
+        $anggota = Anggota::where('pegawai_username', $cuti->pegawai->username)->first();
+        $tim = TimKerja::find(optional($anggota)->tim_kerja_id);
+
+        return view('cuti::pengajuan_cuti.edit', compact(
+            'jenis_cuti',
+            'cuti',
+            'anggota',
+            'tim',
+            'pejabat',
+            'id_pejabat_login',
+            'sisa_cuti'
+        ));
     }
 
     /**
@@ -230,8 +266,64 @@ class CutiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // Validasi inputan
+        $request->validate([
+            'jenis_cuti' => 'required|exists:jenis_cuti,id',
+            'rentang_cuti' => 'required',
+            'dok_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'keterangan' => 'required',
+        ]);
+
+        $cuti = Cuti::findOrFail($id);
+
+        // Explode rentang tanggal
+        $tanggal = $request->input('rentang_cuti');
+        $tanggalRange = explode(' - ', $tanggal);
+        if (count($tanggalRange) !== 2) {
+            return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
+        }
+        $awal_cuti = $tanggalRange[0];
+        $akhir_cuti = $tanggalRange[1];
+
+        DB::beginTransaction();
+        try {
+            // Proses file baru jika ada
+            if ($request->hasFile('dok_pendukung')) {
+                $file = $request->file('dok_pendukung');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('public/uploads/dok_pendukung', $fileName);
+                $dokPendukungPath = 'uploads/dok_pendukung/' . $fileName;
+
+                // Hapus file lama jika ada
+                if ($cuti->dok_pendukung && Storage::exists('public/' . $cuti->dok_pendukung)) {
+                    Storage::delete('public/' . $cuti->dok_pendukung);
+                }
+
+                $cuti->dok_pendukung = $dokPendukungPath;
+            }
+
+            // Update data cuti
+            $cuti->tanggal_mulai = $awal_cuti;
+            $cuti->tanggal_selesai = $akhir_cuti;
+            $cuti->keterangan = $request->keterangan;
+            $cuti->jenis_cuti_id = $request->jenis_cuti;
+            $cuti->save();
+
+            // Tambahkan ke log
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Diedit',
+                'updated_by' => auth()->user()->username,
+            ]);
+
+            DB::commit();
+            return redirect()->route('cuti.index')->with('success', 'Pengajuan cuti berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('cuti.index')->with('danger', 'Terjadi kesalahan saat memperbarui cuti.');
+        }
     }
+
 
     // Update status cuti oleh admin
     public function approvedByKepegawaian(Request $request, $id)

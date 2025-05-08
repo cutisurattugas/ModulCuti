@@ -102,7 +102,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
-                            <select class="form-control" name="jenis_cuti" id="jenis_cuti">
+                            <select class="form-control" name="jenis_cuti" id="jenis_cuti" disabled>
                                 <option value="{{ $cuti->jenis_cuti->id }}">{{ $cuti->jenis_cuti->nama_cuti }}
                                 </option>
                                 @foreach ($jenis_cuti as $item)
@@ -113,7 +113,7 @@
                         <div class="col-md-6">
                             <label for="rentang_cuti" class="form-label">Rentang Cuti</label>
                             <input type="text" class="form-control" name="rentang_cuti" id="rentang_cuti"
-                                value="{{ $cuti->tanggal_mulai }} - {{ $cuti->tanggal_selesai }}" required>
+                                value="{{ $cuti->tanggal_mulai }} - {{ $cuti->tanggal_selesai }}" disabled>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -132,7 +132,12 @@
                         <label for="keterangan" class="form-label">Keterangan</label>
                         <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows="">{{ $cuti->keterangan }}</textarea>
                     </div>
+                    @php
+                        $isPemohon = $cuti->pegawai_username === auth()->user()->username;
+                    @endphp
+
                     @if (auth()->user()->role_aktif === 'admin')
+                        {{-- Admin --}}
                         <div class="row mt-2">
                             <div class="col mb-2 me-2" style="max-width: 180px;">
                                 <form action="{{ route('cuti.approve.unit', $cuti->id) }}" method="POST">
@@ -147,7 +152,8 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login != 1)
+                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login != 1 && !$isPemohon)
+                        {{-- Atasan sebagai pemeriksa --}}
                         <div class="row mt-2">
                             <div class="col mb-2 me-2" style="max-width: 220px;">
                                 <form action="{{ route('cuti.approve.atasan', $cuti->id) }}" method="POST">
@@ -162,7 +168,8 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login == 1)
+                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login == 1 && !$isPemohon)
+                        {{-- Pimpinan sebagai pemeriksa --}}
                         <div class="row mt-2">
                             <div class="col mb-2 me-2" style="max-width: 100px;">
                                 <form action="{{ route('cuti.approve.pimpinan', $cuti->id) }}" method="POST">
@@ -177,23 +184,20 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'terdaftar')
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <button type="button" class="btn btn-danger">Batalkan</button>
+                    @else
+                        {{-- Pegawai biasa atau atasan sebagai pemohon --}}
+                        <div class="row mt-2">
+                            <div class="col mb-2 me-2" style="max-width: 150px;">
+                                <button type="button" class="btn btn-danger w-100">Batalkan</button>
+                            </div>
+                            <div class="col mb-2" style="max-width: 150px;">
+                                <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
+                            </div>
+                        </div>
                     @endif
+
                 </div>
             </div>
         </div>
     </div>
-@stop
-@section('adminlte_js')
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-    <script>
-        new Litepicker({
-            element: document.getElementById('rentang_cuti'),
-            singleMode: false,
-            format: 'YYYY-MM-DD',
-        });
-    </script>
-
 @stop
