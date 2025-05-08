@@ -31,7 +31,7 @@ class CutiController extends Controller
         $pegawai_username = optional($pegawai)->username;
         $pejabat = Pejabat::where('pegawai_username', $pegawai_username)->first();
         $pejabat_id = optional($pejabat)->id;
-
+        
         $cuti = null;
         $cuti_pribadi = null;
         $cuti_anggota = null;
@@ -39,13 +39,22 @@ class CutiController extends Controller
         if ($role == 'admin') {
             // Admin bisa lihat semua cuti
             $cuti = Cuti::latest()->get();
-        } elseif ($role == 'operator' && $pejabat_id == 1) {
-            // Operator pusat bisa lihat semua yang sedang diproses
-            $cuti = Cuti::latest()->get();
-        } elseif ($role == 'operator' && $pejabat_id != 1) {
-            // Atasan (operator bukan pusat)
-            $cuti_anggota = Cuti::where('pejabat_id', $pejabat_id)->latest()->get();
-            $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
+        } elseif ($role == 'operator') {
+            if ($pejabat_id == 1) {
+                // Pimpinan: lihat semua cuti yang sudah diteruskan ke pimpinan
+                $cuti = Cuti::whereHas('logs', function ($query) {
+                    $query->where('status', 'Telah diteruskan ke pimpinan');
+                })->latest()->get();
+            } else {
+                // Atasan: lihat semua cuti yang diteruskan ke atasan dan pejabat_id sesuai
+                $cuti_anggota = Cuti::where('pejabat_id', $pejabat_id)
+                    ->whereHas('logs', function ($query) {
+                        $query->where('status', 'Telah diteruskan ke atasan');
+                    })->latest()->get();
+    
+                // Cuti pribadi tetap bisa dilihat
+                $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
+            }
         } elseif ($role == 'terdaftar') {
             // Pegawai biasa hanya bisa lihat cuti dirinya sendiri
             $cuti_pribadi = Cuti::where('pegawai_username', $pegawai_username)->latest()->get();
@@ -86,7 +95,6 @@ class CutiController extends Controller
             'sisa_cuti',
         ));
     }
-
 
     /**
      * Store a newly created resource in storage.

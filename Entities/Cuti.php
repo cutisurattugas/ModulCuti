@@ -16,7 +16,7 @@ class Cuti extends Model
 
     protected $table = 'cuti';
     protected $primaryKey = 'id';
-    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dok_pendukung', 'status', 'dok_cuti', 'pegawai_username', 'pejabat_id', 'tim_kerja_id','unit_id', 'jenis_cuti_id', 'user_id'];
+    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dok_pendukung', 'status', 'dok_cuti', 'pegawai_username', 'pejabat_id', 'tim_kerja_id', 'unit_id', 'jenis_cuti_id', 'user_id'];
 
     public function jenis_cuti()
     {
@@ -46,5 +46,10 @@ class Cuti extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+    
+    public function logs()
+    {
+        return $this->hasMany(CutiLogs::class, 'cuti_id');
     }
 }
