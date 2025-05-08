@@ -53,10 +53,10 @@
                             case 'Disetujui':
                                 $badgeClass = 'success';
                                 break;
-                            case 'Ditolak':
+                            case 'Dibatalkan':
                                 $badgeClass = 'danger';
                                 break;
-                            case 'Dibatalkan':
+                            case 'Selesai':
                                 $badgeClass = 'secondary';
                                 break;
                             default:

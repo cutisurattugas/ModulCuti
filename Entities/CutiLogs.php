@@ -13,7 +13,7 @@ class CutiLogs extends Model
 
     protected $table = 'cuti_logs';
     protected $primaryKey = 'id';
-    protected $fillable = ['status', 'cuti_id', 'updated_by', 'updated_at'];
+    protected $fillable = ['status', 'cuti_id', 'updated_by', 'catatan','updated_at'];
 
     public function cuti(){
         return $this->belongsTo(Cuti::class, 'cuti_id', 'id');

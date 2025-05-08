@@ -499,8 +499,41 @@ class CutiController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function destroy($id)
+    public function cancelCuti(Request $request, $id)
     {
-        //
+        // Validasi input alasan
+        $request->validate([
+            'alasan_batal' => 'required|string|max:255',
+        ]);
+
+        $cuti = Cuti::find($id);
+
+        if (!$cuti) {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
+        }
+
+        // Tidak boleh batalkan cuti yang sudah disetujui
+        if ($cuti->status === 'Disetujui') {
+            return redirect()->route('cuti.index')->with('danger', 'Cuti yang sudah disetujui tidak bisa dibatalkan.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $cuti->status = 'Dibatalkan';
+            $cuti->save();
+
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Dibatalkan',
+                'catatan' => $request->alasan_batal,
+                'updated_by' => auth()->user()->username,
+            ]);
+
+            DB::commit();
+            return redirect()->route('cuti.index')->with('success', 'Cuti berhasil dibatalkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('cuti.index')->with('danger', 'Gagal membatalkan cuti: ' . $th->getMessage());
+        }
     }
 }

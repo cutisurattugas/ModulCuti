@@ -53,10 +53,10 @@
                                                 case 'Disetujui':
                                                     $badgeClass = 'success';
                                                     break;
-                                                case 'Ditolak':
+                                                case 'Dibatalkan':
                                                     $badgeClass = 'danger';
                                                     break;
-                                                case 'Dibatalkan':
+                                                case 'Selesai':
                                                     $badgeClass = 'secondary';
                                                     break;
                                                 default:
@@ -145,9 +145,15 @@
                                     <button type="submit" class="btn btn-primary w-100">Teruskan ke atasan</button>
                                 </form>
                             </div>
-                            <div class="col mb-2 me-2" style="max-width: 150px;">
-                                <button type="button" class="btn btn-danger w-100">Batalkan</button>
-                            </div>
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                    onsubmit="return confirmCancel(this)">
+                                    @csrf
+                                    <input type="hidden" name="alasan_batal" id="alasan_batal_input">
+                                    <button type="submit" class="btn btn-danger w-100">Batalkan</button>
+                                </form>
+                            @endif
+
                             <div class="col mb-2" style="max-width: 150px;">
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
@@ -161,9 +167,15 @@
                                     <button type="submit" class="btn btn-primary w-100">Teruskan ke pimpinan</button>
                                 </form>
                             </div>
-                            <div class="col mb-2 me-2" style="max-width: 150px;">
-                                <button type="button" class="btn btn-danger w-100">Batalkan</button>
-                            </div>
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                    onsubmit="return confirmCancel(this)">
+                                    @csrf
+                                    <input type="hidden" name="alasan_batal" id="alasan_batal_input">
+                                    <button type="submit" class="btn btn-danger w-100">Batalkan</button>
+                                </form>
+                            @endif
+
                             <div class="col mb-2" style="max-width: 150px;">
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
@@ -177,9 +189,15 @@
                                     <button type="submit" class="btn btn-primary w-100">Setujui</button>
                                 </form>
                             </div>
-                            <div class="col mb-2 me-2" style="max-width: 150px;">
-                                <button type="button" class="btn btn-danger w-100">Batalkan</button>
-                            </div>
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                    onsubmit="return confirmCancel(this)">
+                                    @csrf
+                                    <input type="hidden" name="alasan_batal" id="alasan_batal_input">
+                                    <button type="submit" class="btn btn-danger w-100">Batalkan</button>
+                                </form>
+                            @endif
+
                             <div class="col mb-2" style="max-width: 150px;">
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
@@ -187,9 +205,15 @@
                     @else
                         {{-- Pegawai biasa atau atasan sebagai pemohon --}}
                         <div class="row mt-2">
-                            <div class="col mb-2 me-2" style="max-width: 150px;">
-                                <button type="button" class="btn btn-danger w-100">Batalkan</button>
-                            </div>
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                    onsubmit="return confirmCancel(this)">
+                                    @csrf
+                                    <input type="hidden" name="alasan_batal" id="alasan_batal_input">
+                                    <button type="submit" class="btn btn-danger w-100">Batalkan</button>
+                                </form>
+                            @endif
+
                             <div class="col mb-2" style="max-width: 150px;">
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
@@ -201,3 +225,16 @@
         </div>
     </div>
 @stop
+@section('adminlte_js')
+    <script>
+        function confirmCancel(form) {
+            const reason = prompt('Masukkan alasan pembatalan cuti:');
+            if (!reason) {
+                alert('Alasan pembatalan wajib diisi.');
+                return false;
+            }
+            form.querySelector('#alasan_batal_input').value = reason;
+            return true;
+        }
+    </script>
+@endsection
