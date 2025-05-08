@@ -18,6 +18,7 @@ class CreateCutiLogsTable extends Migration
             $table->string('status');
             $table->unsignedBigInteger('cuti_id');
             $table->string('updated_by');
+            $table->text('catatan')->nullable();
             $table->foreign('cuti_id')->references('id')->on('cuti')->onDelete('cascade');
             $table->foreign('updated_by')->references('username')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
