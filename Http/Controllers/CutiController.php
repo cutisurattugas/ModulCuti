@@ -71,8 +71,11 @@ class CutiController extends Controller
 
         // Hitung sisa cuti
         $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung($pegawai->username);
+        $sisaCutiService->ensureCutiSisaTerbuat($pegawai->username);
 
+        // Ambil data sisa cuti tahun ini
+        $ambilCuti = DB::table('cuti_sisa')->where('pegawai_username', $pegawai->username)->where('tahun', Carbon::now()->year)->first();
+        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa - $ambilCuti->cuti_digunakan;
         // dd($sisa_cuti);
         return view('cuti::pengajuan_cuti.create', compact(
             'jenis_cuti',
@@ -80,7 +83,7 @@ class CutiController extends Controller
             'tim',
             'anggota',
             'ketua',
-            'sisa_cuti'
+            'sisa_cuti',
         ));
     }
 
@@ -180,9 +183,10 @@ class CutiController extends Controller
         $atasanService = new AtasanService();
         $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->username); // ⬅️ Ini yang diganti
 
-        // Sisa cuti
-        $sisaCutiService = new SisaCutiService();
-        $sisa_cuti = $sisaCutiService->hitung($cuti->username);
+        // Ambil data sisa cuti tahun ini
+        $ambilCuti = DB::table('cuti_sisa')->where('pegawai_username', $cuti->pegawai_username)->where('tahun', Carbon::now()->year)->first();
+
+        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa - $ambilCuti->cuti_digunakan;
 
         // Tambahan data lain
         $jenis_cuti = JenisCuti::all();
@@ -308,45 +312,79 @@ class CutiController extends Controller
 
     public function approvedByPimpinan(Request $request, $id)
     {
-        // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
         if (!auth()->user()->role_aktif === 'operator') {
             return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
         }
 
-        // Ambil data cuti berdasarkan ID
         $cuti = Cuti::find($id);
 
         if (!$cuti) {
             return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
         }
 
-        // Mulai transaksi DB
         DB::beginTransaction();
-
         try {
-            // Perbarui status menjadi "Disetujui Unit Kepegawaian"
             $cuti->status = 'Disetujui';
             $cuti->save();
 
-            // Tambahkan log status ke tabel cuti_logs
+            // Hitung durasi cuti
+            $jumlah_hari = Carbon::parse($cuti->tanggal_selesai)
+                ->diffInDays(Carbon::parse($cuti->tanggal_mulai)) + 1;
+
+            // Hanya potong jatah cuti jika jenis cuti adalah tahunan
+            if ($cuti->jenis_cuti_id == 1) {
+                $tahun = Carbon::parse($cuti->tanggal_mulai)->year;
+                $cutiSisa = DB::table('cuti_sisa')
+                    ->where('pegawai_username', $cuti->pegawai_username)
+                    ->where('tahun', $tahun)
+                    ->first();
+
+                if (!$cutiSisa) {
+                    throw new \Exception('Data cuti_sisa tidak ditemukan untuk tahun ' . $tahun);
+                }
+
+                $sisa_dibawa = $cutiSisa->cuti_dibawa;
+                $sisa_awal = $cutiSisa->cuti_awal;
+                $terpakai = 0;
+                $cuti_dibawa_baru = $sisa_dibawa;
+                $cuti_awal_baru = $sisa_awal;
+
+                if ($jumlah_hari <= $sisa_dibawa) {
+                    $cuti_dibawa_baru -= $jumlah_hari;
+                    $terpakai = $jumlah_hari;
+                } else {
+                    $terpakai = $jumlah_hari;
+                    $cuti_dibawa_baru = 0;
+                    $sisa_dari_awal = $jumlah_hari - $sisa_dibawa;
+                    $cuti_awal_baru -= $sisa_dari_awal;
+                }
+
+                DB::table('cuti_sisa')
+                    ->where('pegawai_username', $cuti->pegawai_username)
+                    ->where('tahun', $tahun)
+                    ->update([
+                        'cuti_awal' => $cuti_awal_baru,
+                        'cuti_dibawa' => $cuti_dibawa_baru,
+                        'cuti_digunakan' => $cutiSisa->cuti_digunakan + $terpakai,
+                        'updated_at' => now(),
+                    ]);
+            }
+
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah disetujui pimpinan',
                 'updated_by' => auth()->user()->username,
             ]);
 
-            // Commit transaksi jika tidak ada error
             DB::commit();
-
-            // Redirect ke halaman pengajuan cuti
-            return redirect()->route('cuti.index')->with('success', 'Cuti telah di setujui.');
+            return redirect()->route('cuti.index')->with('success', 'Cuti telah disetujui.');
         } catch (\Throwable $th) {
-            // Rollback jika terjadi error
             DB::rollBack();
-
             return redirect()->route('cuti.index')->with('danger', 'Cuti gagal disetujui karena: ' . $th->getMessage());
         }
     }
+
+
 
     /**
      * Remove the specified resource from storage.

@@ -17,7 +17,9 @@ class CreateCutiSisaTable extends Migration
             $table->id();
             $table->string('pegawai_username');
             $table->integer('tahun');
-            $table->integer('sisa_cuti');
+            $table->integer('cuti_awal')->default(12);
+            $table->integer('cuti_dibawa')->default(0);
+            $table->integer('cuti_digunakan')->default(0);
             $table->foreign('pegawai_username')->references('username')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
