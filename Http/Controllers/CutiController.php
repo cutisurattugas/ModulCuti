@@ -75,7 +75,7 @@ class CutiController extends Controller
 
         // Ambil data sisa cuti tahun ini
         $ambilCuti = DB::table('cuti_sisa')->where('pegawai_username', $pegawai->username)->where('tahun', Carbon::now()->year)->first();
-        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa - $ambilCuti->cuti_digunakan;
+        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa;
         // dd($sisa_cuti);
         return view('cuti::pengajuan_cuti.create', compact(
             'jenis_cuti',
@@ -181,12 +181,12 @@ class CutiController extends Controller
 
         // Ambil data atasan yang benar via service
         $atasanService = new AtasanService();
-        $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->username); // ⬅️ Ini yang diganti
+        $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->username);
 
         // Ambil data sisa cuti tahun ini
         $ambilCuti = DB::table('cuti_sisa')->where('pegawai_username', $cuti->pegawai_username)->where('tahun', Carbon::now()->year)->first();
 
-        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa - $ambilCuti->cuti_digunakan;
+        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa;
 
         // Tambahan data lain
         $jenis_cuti = JenisCuti::all();
@@ -330,10 +330,20 @@ class CutiController extends Controller
             // Hitung durasi cuti
             $jumlah_hari = Carbon::parse($cuti->tanggal_selesai)
                 ->diffInDays(Carbon::parse($cuti->tanggal_mulai)) + 1;
+            $tahun = Carbon::parse($cuti->tanggal_mulai)->year;
 
-            // Hanya potong jatah cuti jika jenis cuti adalah tahunan
-            if ($cuti->jenis_cuti_id == 1) {
-                $tahun = Carbon::parse($cuti->tanggal_mulai)->year;
+            if ($cuti->jenis_cuti_id == 4) {
+                // Jika cuti besar, hanguskan jatah cuti tahunan tahun ini
+                DB::table('cuti_sisa')
+                    ->where('pegawai_username', $cuti->pegawai_username)
+                    ->where('tahun', $tahun)
+                    ->update([
+                        'cuti_awal' => 0,
+                        'cuti_dibawa' => 0,
+                        'updated_at' => now(),
+                    ]);
+            } elseif ($cuti->jenis_cuti_id == 1) {
+                // Hanya potong jatah cuti jika jenis cuti adalah tahunan
                 $cutiSisa = DB::table('cuti_sisa')
                     ->where('pegawai_username', $cuti->pegawai_username)
                     ->where('tahun', $tahun)
@@ -383,8 +393,6 @@ class CutiController extends Controller
             return redirect()->route('cuti.index')->with('danger', 'Cuti gagal disetujui karena: ' . $th->getMessage());
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.
