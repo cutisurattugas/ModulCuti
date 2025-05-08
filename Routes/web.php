@@ -19,6 +19,8 @@ Route::prefix('cuti')->group(function () {
         Route::get('/create', 'CutiController@create')->name('cuti.create');
         Route::post('/store', 'CutiController@store')->name('cuti.store');
         Route::get('/show/{id}', 'CutiController@show')->name('cuti.show');
+        Route::get('/edit/{id}', 'CutiController@edit')->name('cuti.edit');
+        Route::put('/update/{id}', 'CutiController@update')->name('cuti.update');
         Route::post('/approve-unit-kepegawaian/{id}', 'CutiController@approvedByKepegawaian')->name('cuti.approve.unit');
         Route::post('/approve-atasan/{id}', 'CutiController@approvedByAtasan')->name('cuti.approve.atasan');
         Route::post('/approve-pimpinan/{id}', 'CutiController@approvedByPimpinan')->name('cuti.approve.pimpinan');

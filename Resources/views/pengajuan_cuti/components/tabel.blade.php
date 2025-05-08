@@ -69,11 +69,21 @@
 
             <td>
                 <center>
-                    <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}"><i
-                            class="nav-icon fas fa-eye"></i></a>
-                    <a class="btn btn-danger btn-sm" href="#"><i class="nav-icon fas fa-trash"></i></a>
+                    <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}">
+                        <i class="nav-icon fas fa-eye"></i>
+                    </a>
+            
+                    @if (
+                        auth()->user()->role_aktif === 'admin' ||
+                        auth()->user()->username === $item->pegawai_username
+                    )
+                        <a class="btn btn-warning btn-sm" href="{{ route('cuti.edit', $item->id) }}">
+                            <i class="nav-icon fas fa-edit"></i>
+                        </a>
+                    @endif
                 </center>
             </td>
+            
         </tr>
     @empty
         <tr>
