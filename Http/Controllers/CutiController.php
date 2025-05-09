@@ -536,4 +536,17 @@ class CutiController extends Controller
             return redirect()->route('cuti.index')->with('danger', 'Gagal membatalkan cuti: ' . $th->getMessage());
         }
     }
+
+    public function printCuti($id){
+        $cuti = Cuti::find($id);
+
+        // Ambil data atasan yang benar via service
+        $atasanService = new AtasanService();
+        $atasan = $atasanService->getAtasanPegawai($cuti->pegawai->username);
+        
+        // Ambil data pimpinan
+        $pimpinan = Pejabat::where('id', 1)->first();
+        // dd($pimpinan);
+        return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan'));
+    }
 }
