@@ -72,6 +72,9 @@
                     <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}">
                         <i class="nav-icon fas fa-eye"></i>
                     </a>
+                    <a class="btn btn-secondary btn-sm" href="{{ route('cuti.print', $item->id) }}">
+                        <i class="nav-icon fas fa-print"></i>
+                    </a>
             
                     @if (
                         auth()->user()->role_aktif === 'admin' ||

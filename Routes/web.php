@@ -25,6 +25,7 @@ Route::prefix('cuti')->group(function () {
         Route::post('/approve-atasan/{id}', 'CutiController@approvedByAtasan')->name('cuti.approve.atasan');
         Route::post('/approve-pimpinan/{id}', 'CutiController@approvedByPimpinan')->name('cuti.approve.pimpinan');
         Route::post('/cancel/{id}', 'CutiController@cancelCuti')->name('cuti.cancel');
+        Route::get('/print/{id}','CutiController@printCuti')->name('cuti.print');
     });
     Route::prefix('jenis')->group(function () {
         Route::get('/', 'JenisCutiController@index')->name('jenis_cuti.index');

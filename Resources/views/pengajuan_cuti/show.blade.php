@@ -139,12 +139,14 @@
                     @if (auth()->user()->role_aktif === 'admin')
                         {{-- Admin --}}
                         <div class="row mt-2">
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                             <div class="col mb-2 me-2" style="max-width: 180px;">
                                 <form action="{{ route('cuti.approve.unit', $cuti->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-primary w-100">Teruskan ke atasan</button>
                                 </form>
                             </div>
+                            @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
@@ -161,12 +163,14 @@
                     @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login != 1 && !$isPemohon)
                         {{-- Atasan sebagai pemeriksa --}}
                         <div class="row mt-2">
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                             <div class="col mb-2 me-2" style="max-width: 220px;">
                                 <form action="{{ route('cuti.approve.atasan', $cuti->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-primary w-100">Teruskan ke pimpinan</button>
                                 </form>
                             </div>
+                            @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
@@ -183,12 +187,14 @@
                     @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login == 1 && !$isPemohon)
                         {{-- Pimpinan sebagai pemeriksa --}}
                         <div class="row mt-2">
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                             <div class="col mb-2 me-2" style="max-width: 100px;">
                                 <form action="{{ route('cuti.approve.pimpinan', $cuti->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-primary w-100">Setujui</button>
                                 </form>
                             </div>
+                            @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
