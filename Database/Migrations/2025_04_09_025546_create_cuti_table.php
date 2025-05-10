@@ -17,6 +17,7 @@ class CreateCutiTable extends Migration
             $table->id();
             $table->string('tanggal_mulai');
             $table->string('tanggal_selesai');
+            $table->integer('jumlah_cuti');
             $table->text('keterangan')->nullable();
             $table->text('catatan_kepegawaian')->nullable();
             $table->text('alasan_batal')->nullable();

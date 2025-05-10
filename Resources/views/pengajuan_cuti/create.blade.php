@@ -1,5 +1,8 @@
 @extends('adminlte::page')
 @section('title', 'Tambah Pengajuan Cuti')
+@section('css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css ">
+@endsection
 @section('content_header')
     <h1 class="m-0 text-dark"></h1>
 @endsection
@@ -93,7 +96,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="dok_pendukung" class="form-label">Dokumen Pendukung</label>
-                            <input type="file" class="form-control" name="dok_pendukung" id="dok_pendukung" accept=".pdf, image/*">
+                            <input type="file" class="form-control" name="dok_pendukung" id="dok_pendukung"
+                                accept=".pdf, image/*">
                             <small>*Selain cuti tahunan wajib menyertakan dokumen pendukung!</small>
                         </div>
                         <div class="mb-3">
@@ -101,7 +105,7 @@
                             <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows=""></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="{{route('cuti.index')}}" class="btn btn-default">Kembali</a>
+                        <a href="{{ route('cuti.index') }}" class="btn btn-default">Kembali</a>
                     </form>
                 </div>
             </div>
@@ -109,13 +113,12 @@
     </div>
 @stop
 @section('adminlte_js')
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr "></script>
     <script>
-        new Litepicker({
-            element: document.getElementById('rentang_cuti'),
-            singleMode: false,
-            format: 'YYYY-MM-DD',
+        flatpickr('#rentang_cuti', {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            allowInput: true,
         });
     </script>
-
 @stop

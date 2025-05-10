@@ -5,10 +5,10 @@
             <center>Nama</center>
         </th>
         <th>
-            <center>Tanggal Awal</center>
+            <center>Jumlah Cuti</center>
         </th>
         <th>
-            <center>Tanggal Selesai</center>
+            <center>Rentang Cuti</center>
         </th>
         <th>
             <center>Jenis</center>
@@ -31,10 +31,10 @@
                 </center>
             </td>
             <td>
-                <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }}</center>
+                <center>{{ $item->jumlah_cuti }} Hari</center>
             </td>
             <td>
-                <center>{{ date('d M Y', strtotime($item->tanggal_selesai)) }}</center>
+                <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }} - {{ date('d M Y', strtotime($item->tanggal_selesai)) }}</center>
             </td>
             <td>
                 <center>{{ $item->jenis_cuti->nama_cuti }}</center>

@@ -14,6 +14,7 @@ use Modules\Cuti\Entities\CutiLogs;
 use Modules\Cuti\Entities\JenisCuti;
 use Modules\Cuti\Services\AtasanService;
 use Modules\Cuti\Services\SisaCutiService;
+use Modules\Cuti\Services\HariKerjaService;
 use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
@@ -69,7 +70,7 @@ class CutiController extends Controller
     {
         $jenis_cuti = JenisCuti::all();
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
-        
+
         $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
         $tim = TimKerja::find($anggota->tim_kerja_id ?? null); // jika ada
 
@@ -101,7 +102,7 @@ class CutiController extends Controller
      * @return Renderable
      */
     public function store(Request $request)
-    { 
+    {
         // Validasi inputan
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
@@ -113,13 +114,22 @@ class CutiController extends Controller
 
         // Get data pimpinan
         $pimpinanId = Pejabat::where('jabatan_id', 1)->first()->value('id');
-       
+
         // Explode data rentang cuti
         $tanggal = $request->input('rentang_cuti');
-        $tanggalRange = explode(' - ', $tanggal);
+        $tanggalRange = explode(' to ', $tanggal);
         if (count($tanggalRange) == 2) {
             $awal_cuti = $tanggalRange[0];
             $akhir_cuti = $tanggalRange[1];
+
+            // Hitung jumlah hari kerja
+            $hariKerjaService = new HariKerjaService();
+            $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
+
+            // Cek apakah ada hari kerja
+            if ($jumlah_cuti <= 0) {
+                return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
+            }
         } elseif (count($tanggalRange) !== 2) {
             return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
         }
@@ -141,6 +151,7 @@ class CutiController extends Controller
             $data = Cuti::create([
                 'tanggal_mulai' => $awal_cuti,
                 'tanggal_selesai' => $akhir_cuti,
+                'jumlah_cuti' => $jumlah_cuti,
                 'keterangan' => $request->keterangan,
                 'dok_pendukung' => $dokPendukungPath,
                 'status' => 'Diajukan',
@@ -279,13 +290,23 @@ class CutiController extends Controller
 
         // Explode rentang tanggal
         $tanggal = $request->input('rentang_cuti');
-        $tanggalRange = explode(' - ', $tanggal);
-        if (count($tanggalRange) !== 2) {
+        $tanggalRange = explode(' to ', $tanggal);
+        if (count($tanggalRange) == 2) {
+            $awal_cuti = $tanggalRange[0];
+            $akhir_cuti = $tanggalRange[1];
+
+            // Hitung jumlah hari kerja
+            $hariKerjaService = new HariKerjaService();
+            $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
+
+            // Cek apakah ada hari kerja
+            if ($jumlah_cuti <= 0) {
+                return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
+            }
+        } elseif (count($tanggalRange) !== 2) {
             return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
         }
-        $awal_cuti = $tanggalRange[0];
-        $akhir_cuti = $tanggalRange[1];
-
+        
         DB::beginTransaction();
         try {
             // Proses file baru jika ada
@@ -306,6 +327,7 @@ class CutiController extends Controller
             // Update data cuti
             $cuti->tanggal_mulai = $awal_cuti;
             $cuti->tanggal_selesai = $akhir_cuti;
+            $cuti->jumlah_cuti = $jumlah_cuti;
             $cuti->keterangan = $request->keterangan;
             $cuti->jenis_cuti_id = $request->jenis_cuti;
             $cuti->save();
@@ -545,7 +567,7 @@ class CutiController extends Controller
     public function printCuti($id)
     {
         $cuti = Cuti::find($id);
-        
+
         // Ambil data atasan yang benar via service
         $atasanService = new AtasanService();
         $atasan = $atasanService->getAtasanPegawai($cuti->pegawai->id);

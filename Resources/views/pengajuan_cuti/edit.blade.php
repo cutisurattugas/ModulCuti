@@ -1,6 +1,8 @@
 @extends('adminlte::page')
 @section('title', 'Edit Pengajuan Cuti')
-
+@section('css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css ">
+@endsection
 @section('content_header')
     <h1>Edit Pengajuan Cuti</h1>
 @endsection
@@ -106,9 +108,9 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="rentang_cuti" class="form-label">Rentang Cuti</label>
+                                <label for="rentang_cuti" class="form-label">Rentang Cuti </label>
                                 <input type="text" class="form-control" name="rentang_cuti" id="rentang_cuti"
-                                       value="{{ $cuti->tanggal_mulai }} - {{ $cuti->tanggal_selesai }}" required>
+                                       value="{{ $cuti->tanggal_mulai }} to {{ $cuti->tanggal_selesai }}" required>
                             </div>
                         </div>
 
@@ -136,12 +138,12 @@
 @stop
 
 @section('adminlte_js')
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr "></script>
     <script>
-        new Litepicker({
-            element: document.getElementById('rentang_cuti'),
-            singleMode: false,
-            format: 'YYYY-MM-DD',
+        flatpickr('#rentang_cuti', {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            allowInput: true,
         });
     </script>
 @stop
