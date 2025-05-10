@@ -113,7 +113,7 @@
                         <div class="col-md-6">
                             <label for="rentang_cuti" class="form-label">Rentang Cuti</label>
                             <input type="text" class="form-control" name="rentang_cuti" id="rentang_cuti"
-                                value="{{ $cuti->tanggal_mulai }} - {{ $cuti->tanggal_selesai }}" disabled>
+                                value="{{ $cuti->tanggal_mulai }} to {{ $cuti->tanggal_selesai }}" disabled>
                         </div>
                     </div>
                     <div class="mb-3">
