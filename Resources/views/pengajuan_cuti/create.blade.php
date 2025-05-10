@@ -74,8 +74,8 @@
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-3">
-                            <input type="hidden" name="pegawai_username" value="{{ $pegawai->username }}">
-                            <input type="hidden" name="atasan_id" value="{{ $ketua->id }}">
+                            <input type="hidden" name="pegawai_id" value="{{ $pegawai->id }}">
+                            <input type="hidden" name="pejabat_id" value="{{ $ketua->id }}">
                             <input type="hidden" name="tim_kerja_id" value="{{ $tim->id }}">
                             <div class="col-md-6">
                                 <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
@@ -101,7 +101,7 @@
                             <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows=""></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="#" class="btn btn-default">Kembali</a>
+                        <a href="{{route('cuti.index')}}" class="btn btn-default">Kembali</a>
                     </form>
                 </div>
             </div>

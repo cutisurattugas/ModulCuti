@@ -127,7 +127,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Update</button>
-                        <a href="#" class="btn btn-default">Kembali</a>
+                        <a href="{{route('cuti.index')}}" class="btn btn-default">Kembali</a>
                     </form>
                 </div>
             </div>

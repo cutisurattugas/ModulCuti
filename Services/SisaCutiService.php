@@ -9,13 +9,13 @@ use Modules\Cuti\Entities\JenisCuti;
 
 class SisaCutiService
 {
-    function ensureCutiSisaTerbuat($pegawai_username)
+    function ensureCutiSisaTerbuat($pegawaiId)
     {
         $tahun_sekarang = Carbon::now()->year;
 
         // Jika sudah ada, tidak perlu buat ulang
         $sudahAda = DB::table('cuti_sisa')
-            ->where('pegawai_username', $pegawai_username)
+            ->where('pegawai_id', $pegawaiId)
             ->where('tahun', $tahun_sekarang)
             ->exists();
 
@@ -24,7 +24,7 @@ class SisaCutiService
         // Ambil data cuti dari 2 tahun ke belakang (karena tahun sebelumnya bisa membawa akumulasi dari tahun sebelumnya juga)
         $tahun_batas = $tahun_sekarang - 3;
         $cuti_sebelumnya = DB::table('cuti_sisa')
-            ->where('pegawai_username', $pegawai_username)
+            ->where('pegawai_id', $pegawaiId)
             ->where('tahun', '>', $tahun_batas)
             ->where('tahun', '<', $tahun_sekarang)
             ->orderBy('tahun')
@@ -45,7 +45,7 @@ class SisaCutiService
         }
         
         DB::table('cuti_sisa')->insert([
-            'pegawai_username' => $pegawai_username,
+            'pegawai_id' => $pegawaiId,
             'tahun' => $tahun_sekarang,
             'cuti_awal' => 12,
             'cuti_dibawa' => $cuti_dibawa,

@@ -15,12 +15,12 @@ class CreateCutiSisaTable extends Migration
     {
         Schema::create('cuti_sisa', function (Blueprint $table) {
             $table->id();
-            $table->string('pegawai_username');
+            $table->unsignedBigInteger('pegawai_id');
             $table->integer('tahun');
             $table->integer('cuti_awal')->default(12);
             $table->integer('cuti_dibawa')->default(0);
             $table->integer('cuti_digunakan')->default(0);
-            $table->foreign('pegawai_username')->references('username')->on('pegawai')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('pegawai_id')->references('id')->on('pegawais')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
