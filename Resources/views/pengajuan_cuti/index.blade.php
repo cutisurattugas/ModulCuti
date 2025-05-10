@@ -16,7 +16,7 @@
                             $isNotPimpinan = isset($pejabat_id) && $pejabat_id != 1;
                         @endphp
 
-                        @if (auth()->user()->role_aktif === 'terdaftar' || ($isOperator && $isNotPimpinan))
+                        @if (auth()->user()->role_aktif === 'dosen' || ($isOperator && $isNotPimpinan))
                             <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
                         @endif
 

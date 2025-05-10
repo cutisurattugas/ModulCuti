@@ -126,7 +126,7 @@
   <table class="table-identitas">
     <tr><td style="width: 35%;">Nama</td><td>: {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}</td></tr>
     <tr><td>NIP / NIK</td><td>: {{$cuti->pegawai->nip}}</td></tr>
-    <tr><td>Jabatan</td><td>: {{$cuti->pegawai->staff}}</td></tr>
+    <tr><td>Jabatan</td><td>: {{$cuti->pegawai->id_staff}}</td></tr>
     <tr><td>Jenis Cuti</td><td>: {{$cuti->jenis_cuti->nama_cuti}}</td></tr>
   </table>
 
@@ -158,7 +158,9 @@
       </table>
 
       <p style="margin-top: 15px;"><b>Catatan kepegawaian:</b></p>
-      <div class="catatan-box" style="height: 50px; width: 90%;"></div>
+      <div class="catatan-box" style="height: 50px; width: 90%;">
+        <p style="margin-left: 10px">{{$cuti->catatan_kepegawaian}}</p>
+      </div>
       <small style="margin-top: 10px;">2418111979031120212110021354</small>
     </div>
 

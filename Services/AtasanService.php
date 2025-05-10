@@ -9,10 +9,10 @@ use Modules\Pengaturan\Entities\TimKerja;
 
 class AtasanService
 {
-    public function getAtasanPegawai($pegawaiUsername)
+    public function getAtasanPegawai($pegawaiId)
     {
-        $pegawai = Pegawai::find($pegawaiUsername);
-        $keanggotaan = Anggota::where('pegawai_username', $pegawaiUsername)->get();
+        $pegawai = Pegawai::find($pegawaiId);
+        $keanggotaan = Anggota::where('pegawai_id', $pegawaiId)->get();
 
         if ($keanggotaan->isEmpty()) return null;
 
@@ -21,14 +21,14 @@ class AtasanService
             $tim = TimKerja::find($anggota->tim_kerja_id);
             if (
                 strtolower($anggota->peran) === 'ketua' ||
-                ($tim?->ketua && $tim->ketua->pegawai_username == $pegawaiUsername)
+                ($tim?->ketua && $tim->ketua->pegawai_id == $pegawaiId)
             ) {
                 // Jika dia ketua, naik ke atas langsung (Wadir atau Direktur)
                 $parentUnit = $tim?->parentUnit;
 
                 while ($parentUnit) {
                     $ketua = Pejabat::find($parentUnit->ketua_id);
-                    if ($ketua && $ketua->pegawai_username != $pegawaiUsername) {
+                    if ($ketua && $ketua->pegawai_id != $pegawaiId) {
                         return $ketua;
                     }
                     $parentUnit = $parentUnit->parentUnit;
@@ -42,7 +42,7 @@ class AtasanService
 
         while ($tim) {
             $ketua = Pejabat::find($tim->ketua_id);
-            if ($ketua && $ketua->pegawai_username != $pegawaiUsername) {
+            if ($ketua && $ketua->pegawai_id != $pegawaiId) {
                 return $ketua;
             }
             $tim = $tim->parentUnit; // naik terus kalau belum ketemu

@@ -130,22 +130,30 @@
                     </div>
                     <div class="mb-3">
                         <label for="keterangan" class="form-label">Keterangan</label>
-                        <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows="">{{ $cuti->keterangan }}</textarea>
+                        <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows="" readonly>{{ $cuti->keterangan }}</textarea>
                     </div>
+                    @if (auth()->user()->role_aktif != 'admin')
+                        <div class="mb-3">
+                            <label for="catatan_kepegawaian" class="form-label">Catatan Kepegawaian</label>
+                            <textarea class="form-control" name="catatan_kepegawaian" id="catatan_kepegawaian" cols="10" rows="" readonly>{{ $cuti->catatan_kepegawaian }}</textarea>
+                        </div>
+                    @endif
                     @php
-                        $isPemohon = $cuti->pegawai_username === auth()->user()->username;
+                        $isPemohon = $cuti->pegawai->username === auth()->user()->username;
                     @endphp
 
                     @if (auth()->user()->role_aktif === 'admin')
                         {{-- Admin --}}
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                            <div class="col mb-2 me-2" style="max-width: 180px;">
-                                <form action="{{ route('cuti.approve.unit', $cuti->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary w-100">Teruskan ke atasan</button>
-                                </form>
-                            </div>
+                                <div class="col mb-2 me-2" style="max-width: 180px;">
+                                    <form action="{{ route('cuti.approve.unit', $cuti->id) }}" method="POST"
+                                        onsubmit="return catatanKepegawaian(this)">
+                                        @csrf
+                                        <input type="hidden" name="catatan_kepegawaian" id="catatan_kepegawaian_input">
+                                        <button type="submit" class="btn btn-primary w-100">Teruskan ke atasan</button>
+                                    </form>
+                                </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
@@ -160,16 +168,16 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login != 1 && !$isPemohon)
+                    @elseif(auth()->user()->role_aktif === 'kajur' && !$isPemohon)
                         {{-- Atasan sebagai pemeriksa --}}
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                            <div class="col mb-2 me-2" style="max-width: 220px;">
-                                <form action="{{ route('cuti.approve.atasan', $cuti->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary w-100">Teruskan ke pimpinan</button>
-                                </form>
-                            </div>
+                                <div class="col mb-2 me-2" style="max-width: 220px;">
+                                    <form action="{{ route('cuti.approve.atasan', $cuti->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary w-100">Teruskan ke pimpinan</button>
+                                    </form>
+                                </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
@@ -184,16 +192,16 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'operator' && $id_pejabat_login == 1 && !$isPemohon)
+                    @elseif(auth()->user()->role_aktif === 'direktur')
                         {{-- Pimpinan sebagai pemeriksa --}}
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                            <div class="col mb-2 me-2" style="max-width: 100px;">
-                                <form action="{{ route('cuti.approve.pimpinan', $cuti->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary w-100">Setujui</button>
-                                </form>
-                            </div>
+                                <div class="col mb-2 me-2" style="max-width: 100px;">
+                                    <form action="{{ route('cuti.approve.pimpinan', $cuti->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary w-100">Setujui</button>
+                                    </form>
+                                </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
@@ -221,7 +229,7 @@
                             @endif
 
                             <div class="col mb-2" style="max-width: 150px;">
-                                <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
+                                <a href="{{ route('cuti.index') }}" class="btn btn-secondary w-100">Kembali</a>
                             </div>
                         </div>
                     @endif
@@ -240,6 +248,17 @@
                 return false;
             }
             form.querySelector('#alasan_batal_input').value = reason;
+            return true;
+        }
+    </script>
+
+    <script>
+        function catatanKepegawaian(form) {
+            const note = prompt('Masukkan Catatan (opsional):', '');
+
+            // Tidak ada validasi wajib isi
+            form.querySelector('#catatan_kepegawaian_input').value = note || ''; // kosongkan jika batal
+
             return true;
         }
     </script>
