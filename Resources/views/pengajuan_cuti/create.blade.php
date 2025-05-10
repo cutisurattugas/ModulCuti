@@ -73,6 +73,11 @@
                     <h1>Form Pengajuan Cuti</h1>
                     <div class="mt-2">
                         @include('layouts.partials.messages')
+                        @if (session('error'))
+                            <div class="alert alert-warning" role="alert">
+                                {{ session('error') }}
+                            </div>
+                        @endif
                     </div>
                     <form method="POST" action="{{ route('cuti.store') }}" enctype="multipart/form-data">
                         @csrf

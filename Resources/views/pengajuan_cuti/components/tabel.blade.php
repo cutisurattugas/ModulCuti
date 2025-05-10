@@ -45,19 +45,19 @@
                         $status = $item->status;
                         switch ($status) {
                             case 'Diajukan':
-                                $badgeClass = 'primary';
+                                $badgeClass = 'secondary';
                                 break;
                             case 'Diproses':
                                 $badgeClass = 'info';
                                 break;
                             case 'Disetujui':
-                                $badgeClass = 'success';
+                                $badgeClass = 'primary';
                                 break;
                             case 'Dibatalkan':
                                 $badgeClass = 'danger';
                                 break;
                             case 'Selesai':
-                                $badgeClass = 'secondary';
+                                $badgeClass = 'success';
                                 break;
                             default:
                                 $badgeClass = 'light';

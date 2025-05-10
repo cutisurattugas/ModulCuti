@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\CutiLogs;
+use Modules\Cuti\Entities\CutiSisa;
 use Modules\Cuti\Entities\JenisCuti;
 use Modules\Cuti\Services\AtasanService;
 use Modules\Cuti\Services\SisaCutiService;
@@ -126,12 +127,36 @@ class CutiController extends Controller
             $hariKerjaService = new HariKerjaService();
             $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
 
+            // Cek kuota jika jenis cuti adalah "Cuti Tahunan" (id = 1)
+            if ($request->jenis_cuti == 1) {
+                // Ambil tahun dari tanggal mulai cuti
+                $tahunCuti = date('Y', strtotime($awal_cuti));
+                $pegawaiId = $request->pegawai_id;
+
+                // Cari record cuti_sisa untuk pegawai dan tahun ini
+                $cutiSisa = CutiSisa::where('pegawai_id', $pegawaiId)
+                    ->where('tahun', $tahunCuti)
+                    ->first();
+
+                if (!$cutiSisa) {
+                    return redirect()->back()->withInput()->with('error', 'Data kuota cuti tahunan belum tersedia.');
+                }
+
+                // Hitung sisa kuota
+                $kuota = $cutiSisa->cuti_dibawa > 0 ? $cutiSisa->cuti_dibawa : $cutiSisa->cuti_awal;
+                $sisaKuota = $kuota - $cutiSisa->cuti_digunakan;
+
+                if ($jumlah_cuti > $sisaKuota) {
+                    return redirect()->back()->withInput()->with('error', "Pengajuan cuti melebihi kuota yang tersisa.");
+                }
+            }
+
             // Cek apakah ada hari kerja
             if ($jumlah_cuti <= 0) {
-                return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
+                return redirect()->back()->withInput()->with('error', 'Rentang cuti tidak mencakup hari kerja.');
             }
         } elseif (count($tanggalRange) !== 2) {
-            return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
+            return redirect()->back()->withInput()->with('error', 'Format rentang cuti tidak valid.');
         }
 
         // Mulai transaksi DB
@@ -299,6 +324,30 @@ class CutiController extends Controller
             $hariKerjaService = new HariKerjaService();
             $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
 
+                        // Cek kuota jika jenis cuti adalah "Cuti Tahunan" (id = 1)
+            if ($request->jenis_cuti == 1) {
+                // Ambil tahun dari tanggal mulai cuti
+                $tahunCuti = date('Y', strtotime($awal_cuti));
+                $pegawaiId = $request->pegawai_id;
+
+                // Cari record cuti_sisa untuk pegawai dan tahun ini
+                $cutiSisa = CutiSisa::where('pegawai_id', $pegawaiId)
+                    ->where('tahun', $tahunCuti)
+                    ->first();
+
+                if (!$cutiSisa) {
+                    return redirect()->back()->withInput()->with('danger', 'Data kuota cuti tahunan belum tersedia.');
+                }
+
+                // Hitung sisa kuota
+                $kuota = $cutiSisa->cuti_dibawa > 0 ? $cutiSisa->cuti_dibawa : $cutiSisa->cuti_awal;
+                $sisaKuota = $kuota - $cutiSisa->cuti_digunakan;
+
+                if ($jumlah_cuti > $sisaKuota) {
+                    return redirect()->back()->withInput()->with('danger', "Pengajuan cuti melebihi kuota yang tersisa.");
+                }
+            }
+
             // Cek apakah ada hari kerja
             if ($jumlah_cuti <= 0) {
                 return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
@@ -306,7 +355,7 @@ class CutiController extends Controller
         } elseif (count($tanggalRange) !== 2) {
             return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
         }
-        
+
         DB::beginTransaction();
         try {
             // Proses file baru jika ada
