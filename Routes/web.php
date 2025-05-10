@@ -33,4 +33,7 @@ Route::prefix('cuti')->group(function () {
         Route::put('/update/{id}', 'JenisCutiController@update')->name('jenis_cuti.update');
         Route::delete('/destroy/{id}', 'JenisCutiController@destroy')->name('jenis_cuti.destroy');
     });
+    Route::prefix('rekap')->group(function () {
+        Route::get('/', 'RekapCutiController@index')->name('rekap.index');
+    });
 });

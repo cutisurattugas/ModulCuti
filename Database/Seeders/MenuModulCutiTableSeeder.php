@@ -52,5 +52,17 @@ class MenuModulCutiTableSeeder extends Seeder
                 'active' => serialize(['cuti/jenis', 'cuti/jenis*']),
             ]);
         }
+        if ($menu) {
+            Menu::create([
+                'modul' => 'Cuti',
+                'label' => 'Rekap Cuti',
+                'url' => 'cuti/rekap',
+                'can' => serialize(['admin']),
+                'icon' => 'far fa-circle',
+                'urut' => 2,
+                'parent_id' => $menu->id,
+                'active' => serialize(['cuti/rekap', 'cuti/rekap*']),
+            ]);
+        }
     }
 }
