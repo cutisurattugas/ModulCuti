@@ -3,6 +3,7 @@
 namespace Modules\Cuti\Http\Controllers;
 
 use App\Models\Core\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
 use Modules\Pengaturan\Entities\TimKerja;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Auth;
 
 class CutiController extends Controller
 {
@@ -324,7 +327,7 @@ class CutiController extends Controller
             $hariKerjaService = new HariKerjaService();
             $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
 
-                        // Cek kuota jika jenis cuti adalah "Cuti Tahunan" (id = 1)
+            // Cek kuota jika jenis cuti adalah "Cuti Tahunan" (id = 1)
             if ($request->jenis_cuti == 1) {
                 // Ambil tahun dari tanggal mulai cuti
                 $tahunCuti = date('Y', strtotime($awal_cuti));
@@ -615,15 +618,50 @@ class CutiController extends Controller
 
     public function printCuti($id)
     {
-        $cuti = Cuti::find($id);
+        $cuti = Cuti::findOrFail($id);
 
-        // Ambil data atasan yang benar via service
+        // Ambil data atasan
         $atasanService = new AtasanService();
-        $atasan = $atasanService->getAtasanPegawai($cuti->pegawai->id);
+        $atasan = $atasanService->getAtasanPegawai($cuti->pegawai_id);
 
         // Ambil data pimpinan
         $pimpinan = Pejabat::where('id', 1)->first();
-        // dd($pimpinan);
-        return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan'));
+
+        // Hitung jumlah cuti sebelum tanggal_mulai dari cuti saat ini
+        $pegawaiId = $cuti->pegawai_id;
+        $currentTanggalMulai = $cuti->tanggal_mulai;
+
+        // Hitung jumlah hari cuti berdasarkan jenis cuti
+        $cutiCounts = [
+            1 => Cuti::where('pegawai_id', $pegawaiId)
+                ->where('jenis_cuti_id', 1)
+                ->where('status', 'selesai')
+                ->where('tanggal_mulai', '<', $currentTanggalMulai)
+                ->sum('jumlah_cuti'),
+
+            2 => Cuti::where('pegawai_id', $pegawaiId)
+                ->where('jenis_cuti_id', 2)
+                ->where('status', 'selesai')
+                ->where('tanggal_mulai', '<', $currentTanggalMulai)
+                ->sum('jumlah_cuti'),
+
+            3 => Cuti::where('pegawai_id', $pegawaiId)
+                ->where('jenis_cuti_id', 3)
+                ->where('status', 'selesai')
+                ->where('tanggal_mulai', '<', $currentTanggalMulai)
+                ->sum('jumlah_cuti'),
+
+            4 => Cuti::where('pegawai_id', $pegawaiId)
+                ->where('jenis_cuti_id', 4)
+                ->where('status', 'selesai')
+                ->where('tanggal_mulai', '<', $currentTanggalMulai)
+                ->sum('jumlah_cuti'),
+        ];
+
+        // Generate QR Code
+        $qrCodeUrl = url("/cuti/pengajuan/show/" . $cuti->id);
+        $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
+
+        return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
     }
 }

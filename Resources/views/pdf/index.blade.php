@@ -1,194 +1,298 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Form Cuti - Versi Revisi</title>
-  <style>
-    body {
-      font-family: "Times New Roman", serif;
-      font-size: 12pt;
-      margin: 2cm;
-      color: #000;
-    }
+    <meta charset="UTF-8">
+    <title>Surat Permohonan Cuti</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0.5in;
+            color: #000;
+            background: #f4f4f4;
+            line-height: 1.2;
+            font-size: 10pt;
+            box-sizing: border-box;
+        }
 
-    h2, h3 {
-      text-align: center;
-      margin-bottom: 0;
-    }
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Logo akan rata kiri */
+        }
 
-    .center {
-      text-align: center;
-    }
+        .kop-surat img {
+            width: 90px;
+            height: auto;
+            margin-right: 15px;
+        }
 
-    .indent {
-      padding-left: 40px;
-      font-weight: bold;
-    }
+        .kop-surat-text {
+            text-align: center;
+            font-size: 10pt;
+        }
 
-    .table-identitas {
-      margin-top: 10px;
-      margin-left: 40px;
-      font-weight: bold;
-    }
+        h2 {
+            font-size: 14pt;
+            text-align: center;
+            margin: 10px 0;
+        }
 
-    .table-identitas td {
-      padding: 4px;
-      vertical-align: top;
-    }
+        table.form {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 10pt;
+        }
 
-    .section {
-      margin-top: 20px;
-    }
+        table.form td {
+            padding: 3px 6px;
+            vertical-align: top;
+        }
 
-    .ttd-layout {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 50px; /* Menurunkan posisi tanda tangan */
-    }
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
 
-    .ttd-kiri {
-      width: 50%;
-      margin-top: 275px; /* Menurunkan posisi tabel cuti dan catatan */
-    }
+        .table-cuti {
+            width: 45%;
+        }
 
-    .ttd-kanan {
-      width: 48%;
-    }
+        .signatures {
+            width: 55%;
+        }
 
-    .signature-box {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+        .ttd {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
 
-    .qr-space {
-      height: 70px;
-      width: 70px;
-      margin: 10px auto 0;
-      border: 1px dashed #000;
-    }
+        .sign {
+            text-align: center;
+        }
 
-    .cuti-table {
-      width: 100%;
-      border: 1px solid #000;
-      border-collapse: collapse;
-      font-size: 10pt; /* Mengurangi ukuran font */
-    }
+        .catatan-kepegawaian {
+            margin-top: 10px;
+            font-size: 9pt;
+        }
 
-    .cuti-table td {
-      border: 1px solid #000;
-      padding: 4px; /* Mengurangi padding */
-    }
+        /* Tombol Print hanya muncul di web */
+        .web-only {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .catatan-box {
-      border: 1px solid #000;
-      height: 60px; /* Menurunkan tinggi kotak catatan */
-      margin-top: 20px; /* Menurunkan posisi kotak catatan */
-    }
+        .btn-print {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 9pt;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
 
-    .header-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
+        .btn-print:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
 
-    .header-content img {
-      width: 150px; /* Memperbesar gambar */
-      margin-right: 15px; /* Memberikan jarak antara gambar dan teks */
-    }
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            font-size: 9pt;
+            page-break-inside: avoid;
+        }
 
-  </style>
+        .signature-info {
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+
+        /* Styling tambahan untuk Preview Web */
+        @media screen {
+            body {
+                display: flex;
+                justify-content: center;
+                background-color: #f4f4f4;
+            }
+
+            .page-wrapper {
+                width: 100%;
+                max-width: 8.5in;
+                background-color: white;
+                padding: 20px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+                border: 1px solid #ddd;
+                margin-top: 30px;
+                margin-bottom: 30px;
+            }
+        }
+
+        /* Styling untuk Print */
+        @media print {
+            .web-only {
+                display: none;
+            }
+
+            body {
+                font-size: 10pt;
+                margin: 0.5in;
+                max-width: 8.5in;
+                background-color: white;
+            }
+
+            .page-wrapper {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- Bagian header dengan gambar -->
-  <div class="header-content">
-    <img src="{{asset('assets/img/logo.png')}}" alt="Logo Instansi"> <!-- Ganti dengan path gambar logo -->
-    <div>
-      <h3>KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET DAN TEKNOLOGI</h3>
-      <h2>POLITEKNIK NEGERI BANYUWANGI</h2>
-      <p class="center">
-        Jalan Raya Jember KM 13 Labanasem Kabat-Banyuwangi, 68461<br>
-        Telp/Fax : (0333) 636780; E-m@il : poliwangi@poliwangi.ac.id; Laman : poliwangi.ac.id
-      </p>
-    </div>
-  </div>
+    <!-- Tombol hanya muncul di browser -->
+    <div class="page-wrapper">
 
-  <hr style="margin: 20px 0;">
+        <!-- Tombol Print Preview -->
+        <div class="web-only">
+            <button class="btn-print" onclick="window.print()">🖨️ Tampilkan Print Preview</button>
+        </div>
 
-  <h3 class="center"><u>Surat Permohonan {{$cuti->jenis_cuti->nama_cuti}}</u></h3>
+        <!-- Kop Surat -->
+        <div class="kop-surat">
+            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo Politeknik Negeri Banyuwangi">
+            <div class="kop-surat-text">
+                <strong>KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET DAN TEKNOLOGI</strong><br>
+                <strong>POLITEKNIK NEGERI BANYUWANGI</strong><br>
+                Jalan Raya Jember KM 13 Labanasem Kabat-Banyuwangi, 68461<br>
+                Telp/Fax: (0333) 636780; E-mail: poliwangi@poliwangi.ac.id; Laman: poliwangi.ac.id
+            </div>
+        </div>
 
-  <p>Kepada Yth.<br>
-  Direktur Politeknik Negeri Banyuwangi</p>
+        <hr style="margin: 10px 0;">
 
-  <p>Yang bertanda tangan di bawah ini:</p>
+        <h2>Surat Permohonan {{ $cuti->jenis_cuti->nama_cuti }}</h2>
 
-  <table class="table-identitas">
-    <tr><td style="width: 35%;">Nama</td><td>: {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}</td></tr>
-    <tr><td>NIP / NIK</td><td>: {{$cuti->pegawai->nip}}</td></tr>
-    <tr><td>Jabatan</td><td>: {{$cuti->pegawai->id_staff}}</td></tr>
-    <tr><td>Jenis Cuti</td><td>: {{$cuti->jenis_cuti->nama_cuti}}</td></tr>
-  </table>
+        <p>Kepada Yth.<br>
+            Direktur Politeknik Negeri Banyuwangi</p>
 
-  <div class="section">
-    <p>
-      Dengan ini mengajukan permohonan cuti berdasarkan: <br>
-      {{$cuti->jenis_cuti->deskripsi}} terhitung mulai tanggal 
-      <strong>{{ date('d M Y', strtotime($cuti->tanggal_mulai)) }}</strong> hingga tanggal <strong>{{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}</strong>.
-    </p>
+        <p>Yang bertanda tangan dibawah ini:</p>
 
-    <p>Untuk keperluan: {{$cuti->keterangan}}</p>
+        <table class="form">
+            <tr>
+                <td>Nama</td>
+                <td>: {{ $cuti->pegawai->nama }}</td>
+            </tr>
+            <tr>
+                <td>NIP / NIK</td>
+                <td>: {{ $cuti->pegawai->nip }}</td>
+            </tr>
+            <tr>
+                <td>Jabatan</td>
+                <td>: {{ $cuti->pegawai->id_staff }}</td>
+            </tr>
+            <tr>
+                <td>Jenis Cuti</td>
+                <td>: {{ $cuti->jenis_cuti->nama_cuti }}</td>
+            </tr>
+        </table>
 
-    <p>
-      Selama menjalankan izin, alamat saya adalah di: <br>
-      Dsn. Kebonjeruk RT/RW: 01/02, Ds. Bojong Nangka, Kec. Poris. <br>
-      Demikian permohonan ini saya buat untuk dipertimbangkan sebagaimana mestinya.
-    </p>
-  </div>
+        <p>Dengan ini mengajukan permohonan cuti berdasarkan: {{ $cuti->jenis_cuti->deskripsi }}, terhitung mulai
+            tanggal <strong>{{ date('d M Y', strtotime($cuti->tanggal_mulai)) }}</strong> hingga tanggal
+            <strong>{{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}</strong>.
+        </p>
 
-  <div class="ttd-layout">
-    <!-- Kolom kiri -->
-    <div class="ttd-kiri">
-      <table class="cuti-table" style="font-size: 10pt; width: 90%;"> <!-- Mengurangi ukuran font -->
-        <p style="margin-top: 15px;"><b>Cuti yang sudah diambil:</b></p>
-        <tr><td>Cuti tahunan</td><td>: ___ Hari</td></tr>
-        <tr><td>Cuti penting</td><td>: ___ Hari</td></tr>
-        <tr><td>Cuti lahiran</td><td>: ___ Hari</td></tr>
-        <tr><td>Cuti besar</td><td>: ___ Hari</td></tr>
-      </table>
+        <p>Untuk keperluan: {{ $cuti->keterangan }}.</p>
 
-      <p style="margin-top: 15px;"><b>Catatan kepegawaian:</b></p>
-      <div class="catatan-box" style="height: 50px; width: 90%;">
-        <p style="margin-left: 10px">{{$cuti->catatan_kepegawaian}}</p>
-      </div>
-      <small style="margin-top: 10px;">2418111979031120212110021354</small>
-    </div>
+        <p>Selama menjalankan izin, alamat saya adalah di: {{ $cuti->pegawai->kelurahan ?? '-' }}.
+        </p>
 
-    <!-- Kolom kanan tanda tangan (termasuk pemohon) -->
-    <div class="ttd-kanan">
-      <div class="signature-box">
-        Banyuwangi, {{ date('d M Y', strtotime($cuti->created_at)) }}<br>
-        Pemohon,<br><br><br>
-        <div class="qr-space"></div>
-        {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}<br>
-        NIP/NIPPPK/NIK. {{$cuti->pegawai->nip}}
-      </div>
+        <p>Demikian permohonan ini saya buat untuk dipertimbangkan sebagaimana mestinya.</p>
 
-      <div class="signature-box">
-        Mengetahui atasan langsung,<br><br><br>
-        <div class="qr-space"></div>
-        {{ $atasan->pegawai->gelar_dpn ?? '' }}{{ $atasan->pegawai->gelar_dpn ? ' ' : '' }}{{ $atasan->pegawai->nama }}{{ $atasan->pegawai->gelar_blk ? ', ' . $atasan->pegawai->gelar_blk : '' }}<br>
-        NIP/NIPPPK/NIK. {{$atasan->pegawai->nip}}
-      </div>
+        <!-- Container untuk Tabel Cuti dan Tanda Tangan -->
+        <div class="container">
+            <!-- Tabel Cuti -->
+            <div class="table-cuti">
+                <h4>Cuti yang sudah diambil:</h4>
+                <table class="form">
+                    <tr>
+                        <td>Cuti tahunan</td>
+                        <td>: {{ $cutiCounts[1] ?? 0 }} Hari</td>
+                    </tr>
+                    <tr>
+                        <td>Cuti penting</td>
+                        <td>: {{ $cutiCounts[2] ?? 0 }} Hari</td>
+                    </tr>
+                    <tr>
+                        <td>Cuti lahiran</td>
+                        <td>: {{ $cutiCounts[3] ?? 0 }} Hari</td>
+                    </tr>
+                    <tr>
+                        <td>Cuti besar</td>
+                        <td>: {{ $cutiCounts[4] ?? 0 }} Hari</td>
+                    </tr>
+                </table>
 
-      <div class="signature-box">
-        Pejabat yang berwenang,<br><br><br>
-        <div class="qr-space"></div>
-        {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}<br>
-        NIP. {{$pimpinan->pegawai->nip}}
-      </div>
-    </div>
-  </div>
+                <!-- Catatan kepegawaian langsung di bawah tabel cuti -->
+                <div class="catatan-kepegawaian">
+                    Catatan kepegawaian:<br>
+                    {{ $cuti->catatan_kepegawaian }}
+                    <hr>
+                    2418111979031120212110021354
+                </div>
+            </div>
+
+            <!-- Kolom Tanda Tangan Bertiga Vertikal -->
+            <div class="signatures">
+                <div class="ttd">
+                    <div class="sign">
+                        Banyuwangi, {{ date('d M Y', strtotime($cuti->created_at)) }}<br>
+                        Pemohon,<br><br><br><br>
+                        {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}<br>
+                        NIP/NIPPPK/NIK. {{ $cuti->pegawai->nip }}
+                    </div>
+                    <div class="sign">
+                        Mengetahui atasan langsung,<br><br><br><br>
+                        {{ $atasan->pegawai->gelar_dpn ?? '' }}{{ $atasan->pegawai->gelar_dpn ? ' ' : '' }}{{ $atasan->pegawai->nama }}{{ $atasan->pegawai->gelar_blk ? ', ' . $atasan->pegawai->gelar_blk : '' }}<br>
+                        NIP/NIPPPK/NIK. {{ $atasan->pegawai->nip }}
+                    </div>
+                    <div class="sign">
+                        Pejabat yang berwenang,<br><br><br><br>
+                        {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}<br>
+                        NIP. {{ $pimpinan->pegawai->nip }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer dengan QR Code -->
+        <div class="footer">
+            <div style="display: flex; align-items: center;">
+                <!-- Contoh QR Code Placeholder -->
+                <img src="data:image/svg+xml;base64,{{ base64_encode($qrCodeImage) }}" alt="QR Code"
+                    style="width: 50px; height: 50px;" />
+
+                <div class="signature-info">
+                    Surat ini sudah ditandatangani secara digital,<br>
+                    sehingga tidak perlu tanda tangan basah dan stempel.
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- Tutup .page-wrapper -->
 
 </body>
+
 </html>
