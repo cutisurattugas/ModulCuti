@@ -18,14 +18,14 @@ Route::prefix('cuti')->group(function () {
         Route::get('/', 'CutiController@index')->name('cuti.index');
         Route::get('/create', 'CutiController@create')->name('cuti.create');
         Route::post('/store', 'CutiController@store')->name('cuti.store');
-        Route::get('/show/{id}', 'CutiController@show')->name('cuti.show');
-        Route::get('/edit/{id}', 'CutiController@edit')->name('cuti.edit');
-        Route::put('/update/{id}', 'CutiController@update')->name('cuti.update');
-        Route::post('/approve-unit-kepegawaian/{id}', 'CutiController@approvedByKepegawaian')->name('cuti.approve.unit');
-        Route::post('/approve-atasan/{id}', 'CutiController@approvedByAtasan')->name('cuti.approve.atasan');
-        Route::post('/approve-pimpinan/{id}', 'CutiController@approvedByPimpinan')->name('cuti.approve.pimpinan');
-        Route::post('/cancel/{id}', 'CutiController@cancelCuti')->name('cuti.cancel');
-        Route::get('/print/{id}','CutiController@printCuti')->name('cuti.print');
+        Route::get('/show/{access_token}', 'CutiController@show')->name('cuti.show');
+        Route::get('/edit/{access_token}', 'CutiController@edit')->name('cuti.edit');
+        Route::put('/update/{access_token}', 'CutiController@update')->name('cuti.update');
+        Route::post('/approve-unit-kepegawaian/{access_token}', 'CutiController@approvedByKepegawaian')->name('cuti.approve.unit');
+        Route::post('/approve-atasan/{access_token}', 'CutiController@approvedByAtasan')->name('cuti.approve.atasan');
+        Route::post('/approve-pimpinan/{access_token}', 'CutiController@approvedByPimpinan')->name('cuti.approve.pimpinan');
+        Route::post('/cancel/{access_token}', 'CutiController@cancelCuti')->name('cuti.cancel');
+        Route::get('/print/{access_token}','CutiController@printCuti')->name('cuti.print');
     });
     Route::prefix('jenis')->group(function () {
         Route::get('/', 'JenisCutiController@index')->name('jenis_cuti.index');
@@ -35,5 +35,6 @@ Route::prefix('cuti')->group(function () {
     });
     Route::prefix('rekap')->group(function () {
         Route::get('/', 'RekapCutiController@index')->name('rekap.index');
+        Route::get('/show/{id}', 'RekapCutiController@show')->name('rekap.show');
     });
 });

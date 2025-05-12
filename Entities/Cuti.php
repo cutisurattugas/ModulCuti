@@ -16,7 +16,7 @@ class Cuti extends Model
 
     protected $table = 'cuti';
     protected $primaryKey = 'id';
-    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'jumlah_cuti','keterangan', 'catatan_kepegawaian','alasan_batal', 'dok_pendukung', 'status', 'dok_cuti', 'tanggal_disetujui_pejabat', 'tanggal_disetujui_pimpinan', 'pegawai_id', 'pejabat_id', 'pimpinan_id', 'tim_kerja_id', 'unit_id', 'jenis_cuti_id', 'user_id'];
+    protected $fillable = ['tanggal_mulai', 'tanggal_selesai', 'jumlah_cuti','keterangan', 'access_token','catatan_kepegawaian','alasan_batal', 'dok_pendukung', 'status', 'dok_cuti', 'tanggal_disetujui_pejabat', 'tanggal_disetujui_pimpinan', 'pegawai_id', 'pejabat_id', 'pimpinan_id', 'tim_kerja_id', 'unit_id', 'jenis_cuti_id', 'user_id'];
 
     public function jenis_cuti()
     {

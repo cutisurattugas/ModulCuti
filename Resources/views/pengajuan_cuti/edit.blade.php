@@ -96,7 +96,7 @@
                         @endif
                     </div>
 
-                    <form action="{{ route('cuti.update', $cuti->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('cuti.update', $cuti->access_token) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
