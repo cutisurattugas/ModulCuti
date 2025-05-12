@@ -34,7 +34,8 @@
                 <center>{{ $item->jumlah_cuti }} Hari</center>
             </td>
             <td>
-                <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }} - {{ date('d M Y', strtotime($item->tanggal_selesai)) }}</center>
+                <center>{{ date('d M Y', strtotime($item->tanggal_mulai)) }} -
+                    {{ date('d M Y', strtotime($item->tanggal_selesai)) }}</center>
             </td>
             <td>
                 <center>{{ $item->jenis_cuti->nama_cuti }}</center>
@@ -69,18 +70,19 @@
 
             <td>
                 <center>
-                    <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->id) }}">
+                    <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->access_token) }}">
                         <i class="nav-icon fas fa-eye"></i>
                     </a>
 
-                    @if (auth()->user()->role_aktif === 'admin' || auth()->user()->username === $item->pegawai->username)
-                        <a class="btn btn-secondary btn-sm" href="{{ route('cuti.print', $item->id) }}">
+                    @if (auth()->user()->role_aktif === 'admin' ||
+                            (auth()->user()->username === $item->pegawai->username && $item->status === 'Selesai'))
+                        <a class="btn btn-success btn-sm" href="{{ route('cuti.print', $item->access_token) }}">
                             <i class="nav-icon fas fa-print"></i>
                         </a>
                     @endif
 
                     @if (auth()->user()->role_aktif === 'admin' || auth()->user()->username === $item->pegawai->username)
-                        <a class="btn btn-warning btn-sm" href="{{ route('cuti.edit', $item->id) }}">
+                        <a class="btn btn-warning btn-sm" href="{{ route('cuti.edit', $item->access_token) }}">
                             <i class="nav-icon fas fa-edit"></i>
                         </a>
                     @endif

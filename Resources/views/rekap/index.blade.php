@@ -13,13 +13,22 @@
                     <div class="mt-2">
                         @include('layouts.partials.messages')
                     </div>
+                    <form method="GET" action="{{ route('rekap.index') }}" class="form-inline mb-3">
+                        <label for="tahun" class="mr-2">Tahun:</label>
+                        <select name="tahun" id="tahun" class="form-control mr-2">
+                            @foreach ($daftarTahun as $thn)
+                                <option value="{{ $thn }}" {{ $tahun == $thn ? 'selected' : '' }}>
+                                    {{ $thn }}</option>
+                            @endforeach
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </form>
+
 
                     <table class="table table-bordered">
                         <tr>
                             <th width="1%">No</th>
-                            <th>
-                                <center>Tahun</center>
-                            </th>
                             <th>
                                 <center>Nama Pegawai</center>
                             </th>
@@ -38,31 +47,66 @@
                             <th>
                                 <center>Sisa Cuti Tahunan</center>
                             </th>
+                            <th>
+                                <center>Aksi</center>
+                            </th>
                         </tr>
                         @foreach ($pegawaiList as $pegawai)
                             <tr>
                                 <td>
                                     <center>{{ $loop->iteration }}</center>
                                 </td>
-                                <td>{{ $pegawai->nama }}</td>
-                                <td>{{ $pegawai->nama }}</td>
+                                <td>{{ $pegawai->gelar_dpn ?? '' }}{{ $pegawai->gelar_dpn ? ' ' : '' }}{{ $pegawai->nama }}{{ $pegawai->gelar_blk ? ', ' . $pegawai->gelar_blk : '' }}
+                                </td>
                                 <td>{{ $pegawai->jumlah_cuti_1 }}</td>
                                 <td>{{ $pegawai->jumlah_cuti_2 }}</td>
                                 <td>{{ $pegawai->jumlah_cuti_3 }}</td>
                                 <td>{{ $pegawai->jumlah_cuti_4 }}</td>
-                                <td>{{ 12 - $pegawai->jumlah_cuti_1 }}</td>
+                                <td>
+                                    @php
+                                        $totalJatah = 12;
+                                        $cutiTahunan = $pegawai->jumlah_cuti_1;
+                                        $sisaCuti = $totalJatah - $cutiTahunan;
+                                        $persen = ($cutiTahunan / $totalJatah) * 100;
+                                    @endphp
+
+                                    <div class="mb-1">{{ $sisaCuti }} hari</div>
+                                    <div class="progress" style="height: 15px;">
+                                        <div class="progress-bar 
+                                            @if ($persen >= 90) bg-danger
+                                            @elseif ($persen >= 70)
+                                                bg-warning
+                                            @else
+                                                bg-success @endif
+                                            "role="progressbar"
+                                            style="width: {{ $persen }}%;" aria-valuenow="{{ $persen }}"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Tombol buka modal -->
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                        data-target="#detailCutiModal-{{ $pegawai->id }}">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+
+                                    <!-- Include modal untuk pegawai ini -->
+                                    @include('cuti::rekap.components.show', ['pegawai' => $pegawai])
+                                </td>
+
                             </tr>
                         @endforeach
                     </table>
-
+                    <br>
                     <div class="d-flex">
-                        {{-- {!! $jenis->links('pagination::bootstrap-4') !!} --}}
+                        {{ $pegawaiList->links('pagination::bootstrap-4') }}
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+
 @stop
 @section('adminlte_js')
 

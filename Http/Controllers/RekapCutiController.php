@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Pengaturan\Entities\Pegawai;
+use Illuminate\Support\Facades\DB;
 
 class RekapCutiController extends Controller
 {
@@ -14,28 +15,48 @@ class RekapCutiController extends Controller
      * Display a listing of the resource.
      * @return Renderable
      */
-    public function index()
-    {
-        $pegawaiList = Pegawai::all()->map(function ($pegawai) {
-            // Hitung jumlah cuti per jenis
-            $cutiCounts = Cuti::where('pegawai_id', $pegawai->id)
-                ->whereIn('jenis_cuti_id', [1, 2, 3, 4])
-                ->where('status', 'Selesai')
-                ->selectRaw('jenis_cuti_id, count(*) as total')
-                ->groupBy('jenis_cuti_id')
-                ->pluck('total', 'jenis_cuti_id');
 
-            // Assign ke property tambahan di model
-            $pegawai->jumlah_cuti_1 = $cutiCounts[1] ?? 0;
-            $pegawai->jumlah_cuti_2 = $cutiCounts[2] ?? 0;
-            $pegawai->jumlah_cuti_3 = $cutiCounts[3] ?? 0;
-            $pegawai->jumlah_cuti_4 = $cutiCounts[4] ?? 0;
+    public function index(Request $request)
+    {
+        $tahun = $request->input('tahun');
+
+        // Ambil semua tahun unik dari tabel cuti (kolom tanggal_mulai)
+        $daftarTahun = Cuti::selectRaw('YEAR(tanggal_mulai) as tahun')
+            ->distinct()
+            ->orderByDesc('tahun')
+            ->pluck('tahun');
+
+        // Jika tidak dipilih tahun, default ke tahun terbaru
+        if (!$tahun) {
+            $tahun = $daftarTahun->first();
+        }
+
+        $pegawaiList = Pegawai::orderBy('nama')->paginate(30);
+
+        $cutiData = Cuti::whereIn('pegawai_id', $pegawaiList->pluck('id'))
+            ->whereYear('tanggal_mulai', $tahun)
+            ->whereIn('jenis_cuti_id', [1, 2, 3, 4])
+            ->where('status', 'Selesai')
+            ->selectRaw('pegawai_id, jenis_cuti_id, SUM(jumlah_cuti) as total')
+            ->groupBy('pegawai_id', 'jenis_cuti_id')
+            ->get()
+            ->groupBy('pegawai_id');
+
+        $pegawaiList->getCollection()->transform(function ($pegawai) use ($cutiData) {
+            $cutiCounts = $cutiData[$pegawai->id] ?? collect();
+
+            $pegawai->jumlah_cuti_1 = $cutiCounts->firstWhere('jenis_cuti_id', 1)['total'] ?? 0;
+            $pegawai->jumlah_cuti_2 = $cutiCounts->firstWhere('jenis_cuti_id', 2)['total'] ?? 0;
+            $pegawai->jumlah_cuti_3 = $cutiCounts->firstWhere('jenis_cuti_id', 3)['total'] ?? 0;
+            $pegawai->jumlah_cuti_4 = $cutiCounts->firstWhere('jenis_cuti_id', 4)['total'] ?? 0;
 
             return $pegawai;
         });
 
-        return view('cuti::rekap.index', compact('pegawaiList'));
+        return view('cuti::rekap.index', compact('pegawaiList', 'tahun', 'daftarTahun'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -63,7 +84,13 @@ class RekapCutiController extends Controller
      */
     public function show($id)
     {
-        return view('cuti::show');
+        $riwayatCuti = Cuti::where('pegawai_id', $id)
+            ->with('jenisCuti') // Jika ada relasi jenis cuti
+            ->orderByDesc('tanggal_mulai')
+            ->get();
+
+        // Return dengan data riwayat cuti
+        return view('cuti::rekap.index', compact('riwayatCuti'));
     }
 
     /**

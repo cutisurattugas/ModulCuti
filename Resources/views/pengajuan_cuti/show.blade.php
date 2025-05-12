@@ -147,7 +147,7 @@
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <div class="col mb-2 me-2" style="max-width: 180px;">
-                                    <form action="{{ route('cuti.approve.unit', $cuti->id) }}" method="POST"
+                                    <form action="{{ route('cuti.approve.unit', $cuti->access_token) }}" method="POST"
                                         onsubmit="return catatanKepegawaian(this)">
                                         @csrf
                                         <input type="hidden" name="catatan_kepegawaian" id="catatan_kepegawaian_input">
@@ -156,7 +156,7 @@
                                 </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                <form action="{{ route('cuti.cancel', $cuti->access_token) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
                                     @csrf
                                     <input type="hidden" name="alasan_batal" id="alasan_batal_input">
@@ -173,14 +173,14 @@
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <div class="col mb-2 me-2" style="max-width: 220px;">
-                                    <form action="{{ route('cuti.approve.atasan', $cuti->id) }}" method="POST">
+                                    <form action="{{ route('cuti.approve.atasan', $cuti->access_token) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-primary w-100">Teruskan ke pimpinan</button>
                                     </form>
                                 </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                <form action="{{ route('cuti.cancel', $cuti->access_token) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
                                     @csrf
                                     <input type="hidden" name="alasan_batal" id="alasan_batal_input">
@@ -197,14 +197,14 @@
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <div class="col mb-2 me-2" style="max-width: 100px;">
-                                    <form action="{{ route('cuti.approve.pimpinan', $cuti->id) }}" method="POST">
+                                    <form action="{{ route('cuti.approve.pimpinan', $cuti->access_token) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-primary w-100">Setujui</button>
                                     </form>
                                 </div>
                             @endif
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                <form action="{{ route('cuti.cancel', $cuti->access_token) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
                                     @csrf
                                     <input type="hidden" name="alasan_batal" id="alasan_batal_input">
@@ -220,7 +220,7 @@
                         {{-- Pegawai biasa atau atasan sebagai pemohon --}}
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
-                                <form action="{{ route('cuti.cancel', $cuti->id) }}" method="POST"
+                                <form action="{{ route('cuti.cancel', $cuti->access_token) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
                                     @csrf
                                     <input type="hidden" name="alasan_batal" id="alasan_batal_input">

@@ -11,14 +11,7 @@
                     <h1>Cuti</h1>
                     <div class="lead">
                         Manaje pengajuan cuti.
-                        @php
-                            $isOperator = auth()->user()->role_aktif === 'operator';
-                            $isNotPimpinan = isset($pejabat_id) && $pejabat_id != 1;
-                        @endphp
-
-                        @if (auth()->user()->role_aktif === 'dosen' || ($isOperator && $isNotPimpinan))
-                            <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
-                        @endif
+                         <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
 
                     </div>
 

@@ -193,7 +193,7 @@
         <table class="form">
             <tr>
                 <td>Nama</td>
-                <td>: {{ $cuti->pegawai->nama }}</td>
+                <td>: {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}</td>
             </tr>
             <tr>
                 <td>NIP / NIK</td>

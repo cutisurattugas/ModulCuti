@@ -23,6 +23,7 @@ use Modules\Pengaturan\Entities\Pejabat;
 use Modules\Pengaturan\Entities\TimKerja;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CutiController extends Controller
 {
@@ -175,12 +176,17 @@ class CutiController extends Controller
                 $dokPendukungPath = null;
             }
 
+            // Generate access token
+            $uuid = Str::uuid()->toString();
+            $access_token = substr($uuid, 0, 12);
+
             // Insert data ke tabel cuti
             $data = Cuti::create([
                 'tanggal_mulai' => $awal_cuti,
                 'tanggal_selesai' => $akhir_cuti,
                 'jumlah_cuti' => $jumlah_cuti,
                 'keterangan' => $request->keterangan,
+                'access_token' => $access_token,
                 'dok_pendukung' => $dokPendukungPath,
                 'status' => 'Diajukan',
                 'pegawai_id' => $request->pegawai_id,
@@ -213,7 +219,7 @@ class CutiController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function show($id)
+    public function show($access_token)
     {
         $user_login = auth()->user();
 
@@ -226,7 +232,7 @@ class CutiController extends Controller
             $id_pejabat_login = optional($pejabat_login)->id;
         }
         // dd($pejabat_login);
-        $cuti = Cuti::findOrFail($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         // Ambil data atasan yang benar via service
         $atasanService = new AtasanService();
@@ -258,7 +264,7 @@ class CutiController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function edit($id)
+    public function edit($access_token)
     {
         $user_login = auth()->user();
 
@@ -271,7 +277,7 @@ class CutiController extends Controller
             $id_pejabat_login = optional($pejabat_login)->id;
         }
         // dd($pejabat_login);
-        $cuti = Cuti::findOrFail($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         // Ambil data atasan yang benar via service
         $atasanService = new AtasanService();
@@ -304,7 +310,7 @@ class CutiController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $access_token)
     {
         // Validasi inputan
         $request->validate([
@@ -314,7 +320,7 @@ class CutiController extends Controller
             'keterangan' => 'required',
         ]);
 
-        $cuti = Cuti::findOrFail($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         // Explode rentang tanggal
         $tanggal = $request->input('rentang_cuti');
@@ -401,7 +407,7 @@ class CutiController extends Controller
 
 
     // Update status cuti oleh admin
-    public function approvedByKepegawaian(Request $request, $id)
+    public function approvedByKepegawaian(Request $request, $access_token)
     {
         // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
         if (!auth()->user()->role_aktif === 'admin') {
@@ -409,7 +415,7 @@ class CutiController extends Controller
         }
 
         // Ambil data cuti berdasarkan ID
-        $cuti = Cuti::find($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         if (!$cuti) {
             return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
@@ -444,7 +450,7 @@ class CutiController extends Controller
         }
     }
 
-    public function approvedByAtasan(Request $request, $id)
+    public function approvedByAtasan(Request $request, $access_token)
     {
         // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
         if (!auth()->user()->role_aktif === 'operator') {
@@ -452,7 +458,8 @@ class CutiController extends Controller
         }
 
         // Ambil data cuti berdasarkan ID
-        $cuti = Cuti::find($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
+
 
         if (!$cuti) {
             return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
@@ -487,13 +494,13 @@ class CutiController extends Controller
         }
     }
 
-    public function approvedByPimpinan(Request $request, $id)
+    public function approvedByPimpinan(Request $request, $access_token)
     {
         if (!auth()->user()->role_aktif === 'operator') {
             return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
         }
 
-        $cuti = Cuti::find($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         if (!$cuti) {
             return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
@@ -577,14 +584,14 @@ class CutiController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function cancelCuti(Request $request, $id)
+    public function cancelCuti(Request $request, $access_token)
     {
         // Validasi input alasan
         $request->validate([
             'alasan_batal' => 'required|string|max:255',
         ]);
 
-        $cuti = Cuti::find($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         if (!$cuti) {
             return redirect()->route('cuti.index')->with('danger', 'Cuti tidak ditemukan.');
@@ -616,9 +623,9 @@ class CutiController extends Controller
         }
     }
 
-    public function printCuti($id)
+    public function printCuti($access_token)
     {
-        $cuti = Cuti::findOrFail($id);
+        $cuti = Cuti::where('access_token', $access_token)->first();
 
         // Ambil data atasan
         $atasanService = new AtasanService();
@@ -658,10 +665,31 @@ class CutiController extends Controller
                 ->sum('jumlah_cuti'),
         ];
 
-        // Generate QR Code
-        $qrCodeUrl = url("/cuti/pengajuan/show/" . $cuti->id);
-        $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
+        DB::beginTransaction();
+        try {
+            if ($cuti->status !== 'Disetujui') {
+                return redirect()->back()->with('danger', 'Status cuti belum disetujui. Tidak bisa menyelesaikan proses.');
+            }
 
-        return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
+            $cuti->status = 'Selesai';
+            $cuti->save();
+
+            CutiLogs::create([
+                'cuti_id' => $cuti->id,
+                'status' => 'Selesai',
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            DB::commit();
+
+            // Generate QR Code
+            $qrCodeUrl = url("/cuti/pengajuan/show/" . $cuti->id);
+            $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
+
+            return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('cuti.index')->with('danger', 'Gagal menyelesaikan cuti: ' . $th->getMessage());
+        }
     }
 }

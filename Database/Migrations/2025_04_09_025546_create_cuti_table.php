@@ -22,6 +22,7 @@ class CreateCutiTable extends Migration
             $table->text('catatan_kepegawaian')->nullable();
             $table->text('alasan_batal')->nullable();
             $table->string('dok_pendukung')->nullable();
+            $table->string('access_token')->nullable();
             $table->string('status');
             $table->unsignedBigInteger('pegawai_id');
             $table->unsignedBigInteger('pejabat_id');
