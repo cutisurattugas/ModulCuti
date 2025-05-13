@@ -68,7 +68,7 @@
         .ttd {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 20px;
         }
 
         .sign {
@@ -103,6 +103,32 @@
             background-color: #0056b3;
             transform: scale(1.05);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .digital-stamp {
+            display: flex;
+            align-items: center;
+            border: 1px solid #000;
+            padding: 2px 4px;
+            max-width: 260px;
+            font-size: 7pt;
+            line-height: 1.1;
+            margin: 5px auto 0 auto;
+            background-color: white;
+        }
+
+        .stamp-logo {
+            flex-shrink: 0;
+            margin-right: 6px;
+        }
+
+        .stamp-logo img {
+            width: 28px;
+            height: auto;
+        }
+
+        .stamp-text {
+            flex-grow: 1;
         }
 
         .footer {
@@ -156,6 +182,10 @@
                 box-shadow: none;
                 padding: 0;
             }
+
+            .signatures {
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
@@ -193,7 +223,9 @@
         <table class="form">
             <tr>
                 <td>Nama</td>
-                <td>: {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}</td>
+                <td>:
+                    {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}
+                </td>
             </tr>
             <tr>
                 <td>NIP / NIK</td>
@@ -259,17 +291,56 @@
                 <div class="ttd">
                     <div class="sign">
                         Banyuwangi, {{ date('d M Y', strtotime($cuti->created_at)) }}<br>
-                        Pemohon,<br><br><br><br>
+                        Pemohon,<br>
+                        <div class="digital-stamp">
+                            <div class="stamp-logo">
+                                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo Instansi">
+                            </div>
+                            <div class="stamp-text">
+                                Ditandatangani secara elektronik oleh<br>
+                                Direktur Politeknik Negeri Banyuwangi<br>
+                                selaku Pejabat yang Berwenang
+                                <strong style="display: block; margin-top: 2px;">
+                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
+                                </strong>
+                            </div>
+                        </div>
                         {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}<br>
                         NIP/NIPPPK/NIK. {{ $cuti->pegawai->nip }}
                     </div>
                     <div class="sign">
-                        Mengetahui atasan langsung,<br><br><br><br>
+                        Mengetahui atasan langsung,<br>
+                        <div class="digital-stamp">
+                            <div class="stamp-logo">
+                                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo Instansi">
+                            </div>
+                            <div class="stamp-text">
+                                Ditandatangani secara elektronik oleh<br>
+                                Direktur Politeknik Negeri Banyuwangi<br>
+                                selaku Pejabat yang Berwenang
+                                <strong style="display: block; margin-top: 2px;">
+                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
+                                </strong>
+                            </div>
+                        </div>
                         {{ $atasan->pegawai->gelar_dpn ?? '' }}{{ $atasan->pegawai->gelar_dpn ? ' ' : '' }}{{ $atasan->pegawai->nama }}{{ $atasan->pegawai->gelar_blk ? ', ' . $atasan->pegawai->gelar_blk : '' }}<br>
                         NIP/NIPPPK/NIK. {{ $atasan->pegawai->nip }}
                     </div>
                     <div class="sign">
-                        Pejabat yang berwenang,<br><br><br><br>
+                        Pejabat yang berwenang,<br>
+                        <div class="digital-stamp">
+                            <div class="stamp-logo">
+                                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo Instansi">
+                            </div>
+                            <div class="stamp-text">
+                                Ditandatangani secara elektronik oleh<br>
+                                Direktur Politeknik Negeri Banyuwangi<br>
+                                selaku Pejabat yang Berwenang
+                                <strong style="display: block; margin-top: 2px;">
+                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
+                                </strong>
+                            </div>
+                        </div>
                         {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}<br>
                         NIP. {{ $pimpinan->pegawai->nip }}
                     </div>

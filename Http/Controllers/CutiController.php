@@ -17,6 +17,7 @@ use Modules\Cuti\Entities\JenisCuti;
 use Modules\Cuti\Services\AtasanService;
 use Modules\Cuti\Services\SisaCutiService;
 use Modules\Cuti\Services\HariKerjaService;
+use Modules\Cuti\Services\WhatsappService;
 use Modules\Pengaturan\Entities\Anggota;
 use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
@@ -440,6 +441,11 @@ class CutiController extends Controller
             // Commit transaksi jika tidak ada error
             DB::commit();
 
+            // $waService = new WhatsappService();
+            // $username = $cuti->pegawai->username;
+            // $message = "Cuti anda telah diteruskan ke atasan.";
+            // $result = $waService->sendMessage($username, $message);
+
             // Redirect ke halaman pengajuan cuti
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke atasan.');
         } catch (\Throwable $th) {
@@ -483,6 +489,11 @@ class CutiController extends Controller
 
             // Commit transaksi jika tidak ada error
             DB::commit();
+
+            // $waService = new WhatsappService();
+            // $username = $cuti->pegawai->username;
+            // $message = "Cuti anda telah disetujui atasan.";
+            // $result = $waService->sendMessage($username, $message);
 
             // Redirect ke halaman pengajuan cuti
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke pimpinan.');
@@ -571,6 +582,11 @@ class CutiController extends Controller
                 'updated_by' => auth()->user()->id,
             ]);
 
+            // $waService = new WhatsappService();
+            // $username = $cuti->pegawai->username;
+            // $message = "Cuti anda telah disetujui pimpinan.";
+            // $result = $waService->sendMessage($username, $message);
+
             DB::commit();
             return redirect()->route('cuti.index')->with('success', 'Cuti telah disetujui.');
         } catch (\Throwable $th) {
@@ -614,6 +630,11 @@ class CutiController extends Controller
                 'catatan' => $request->alasan_batal,
                 'updated_by' => auth()->user()->id,
             ]);
+
+            // $waService = new WhatsappService();
+            // $username = $cuti->pegawai->username;
+            // $message = "Cuti anda telah telah dibatalkan";
+            // $result = $waService->sendMessage($username, $message);
 
             DB::commit();
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil dibatalkan.');
@@ -667,9 +688,9 @@ class CutiController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($cuti->status !== 'Disetujui') {
-                return redirect()->back()->with('danger', 'Status cuti belum disetujui. Tidak bisa menyelesaikan proses.');
-            }
+            // if ($cuti->status !== 'Disetujui') {
+            //     return redirect()->back()->with('danger', 'Status cuti belum disetujui. Tidak bisa menyelesaikan proses.');
+            // }
 
             $cuti->status = 'Selesai';
             $cuti->save();
@@ -683,13 +704,24 @@ class CutiController extends Controller
             DB::commit();
 
             // Generate QR Code
-            $qrCodeUrl = url("/cuti/pengajuan/show/" . $cuti->id);
+            $qrCodeUrl = url("/tracking-cuti/" . $cuti->access_token);
             $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
 
+            // Send whatsapp
+            // $waService = new WhatsappService();
+            // $username = $cuti->pegawai->username;
+            // $message = "Cuti anda telah selesai di proses";
+            // $result = $waService->sendMessage($username, $message);
             return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->route('cuti.index')->with('danger', 'Gagal menyelesaikan cuti: ' . $th->getMessage());
         }
+    }
+
+    public function trackingCuti($access_token)
+    {
+        $cuti = Cuti::where('access_token', $access_token)->first();
+        return view('cuti::pengajuan_cuti.tracking', compact('cuti'));
     }
 }

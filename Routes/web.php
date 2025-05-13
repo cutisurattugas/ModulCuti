@@ -25,7 +25,7 @@ Route::prefix('cuti')->group(function () {
         Route::post('/approve-atasan/{access_token}', 'CutiController@approvedByAtasan')->name('cuti.approve.atasan');
         Route::post('/approve-pimpinan/{access_token}', 'CutiController@approvedByPimpinan')->name('cuti.approve.pimpinan');
         Route::post('/cancel/{access_token}', 'CutiController@cancelCuti')->name('cuti.cancel');
-        Route::get('/print/{access_token}','CutiController@printCuti')->name('cuti.print');
+        Route::get('/print/{access_token}', 'CutiController@printCuti')->name('cuti.print');
     });
     Route::prefix('jenis')->group(function () {
         Route::get('/', 'JenisCutiController@index')->name('jenis_cuti.index');
@@ -38,3 +38,5 @@ Route::prefix('cuti')->group(function () {
         Route::get('/show/{id}', 'RekapCutiController@show')->name('rekap.show');
     });
 });
+
+Route::get('/tracking-cuti/{access_token}', 'CutiController@trackingCuti')->name('cuti.tracking');
