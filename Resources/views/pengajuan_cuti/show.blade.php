@@ -145,7 +145,7 @@
                     @if (auth()->user()->role_aktif === 'admin')
                         {{-- Admin --}}
                         <div class="row mt-2">
-                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai', 'Diproses']))
                                 <div class="col mb-2 me-2" style="max-width: 180px;">
                                     <form action="{{ route('cuti.approve.unit', $cuti->access_token) }}" method="POST"
                                         onsubmit="return catatanKepegawaian(this)">
@@ -155,7 +155,7 @@
                                     </form>
                                 </div>
                             @endif
-                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
+                            @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai', 'Diproses']))
                                 <form action="{{ route('cuti.cancel', $cuti->access_token) }}" method="POST"
                                     onsubmit="return confirmCancel(this)">
                                     @csrf

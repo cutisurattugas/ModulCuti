@@ -688,31 +688,38 @@ class CutiController extends Controller
 
         DB::beginTransaction();
         try {
-            // if ($cuti->status !== 'Disetujui') {
-            //     return redirect()->back()->with('danger', 'Status cuti belum disetujui. Tidak bisa menyelesaikan proses.');
-            // }
+            if ($cuti->status === 'Disetujui') {
+                // Ubah status ke "Selesai"
+                $cuti->status = 'Selesai';
+                $cuti->save();
 
-            $cuti->status = 'Selesai';
-            $cuti->save();
+                // Simpan log
+                CutiLogs::create([
+                    'cuti_id' => $cuti->id,
+                    'status' => 'Selesai',
+                    'updated_by' => auth()->user()->id,
+                ]);
 
-            CutiLogs::create([
-                'cuti_id' => $cuti->id,
-                'status' => 'Selesai',
-                'updated_by' => auth()->user()->id,
-            ]);
+                DB::commit();
 
-            DB::commit();
+                // Kirim WA
+                $waService = new WhatsappService();
+                $username = $cuti->pegawai->username;
+                $message = "Cuti anda telah selesai di proses";
+                $waService->sendMessage($username, $message);
+            }
 
-            // Generate QR Code
-            $qrCodeUrl = url("/tracking-cuti/" . $cuti->access_token);
-            $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
+            // Jika status sudah "Selesai", atau baru saja diubah ke "Selesai", tetap buat QR dan tampilkan PDF
+            if ($cuti->status === 'Selesai') {
+                $qrCodeUrl = url("/tracking-cuti/" . $cuti->access_token);
+                $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
 
-            // Send whatsapp
-            // $waService = new WhatsappService();
-            // $username = $cuti->pegawai->username;
-            // $message = "Cuti anda telah selesai di proses";
-            // $result = $waService->sendMessage($username, $message);
-            return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
+                return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
+            }
+
+            // Jika status selain "Disetujui" atau "Selesai", kembalikan
+            DB::rollBack();
+            return redirect()->back()->with('danger', 'Status cuti tidak valid untuk diproses.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->route('cuti.index')->with('danger', 'Gagal menyelesaikan cuti: ' . $th->getMessage());
