@@ -74,7 +74,8 @@
                         <i class="nav-icon fas fa-eye"></i>
                     </a>
 
-                    @if (auth()->user()->role_aktif === 'admin' ||
+                    @if (
+                        (auth()->user()->role_aktif === 'admin' && in_array($item->status, ['Disetujui', 'Selesai'])) ||
                             (auth()->user()->username === $item->pegawai->username && $item->status === 'Selesai'))
                         <a class="btn btn-success btn-sm" href="{{ route('cuti.print', $item->access_token) }}">
                             <i class="nav-icon fas fa-print"></i>

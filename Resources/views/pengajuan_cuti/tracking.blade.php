@@ -112,7 +112,9 @@
             <table>
                 <tr>
                     <td><strong>Nama</strong></td>
-                    <td>: {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}</td>
+                    <td>:
+                        {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}
+                    </td>
                 </tr>
                 <tr>
                     <td><strong>NIP</strong></td>
@@ -126,6 +128,14 @@
                     <td><strong>Tanggal Cuti</strong></td>
                     <td>: {{ date('d M Y', strtotime($cuti->tanggal_mulai)) }} s.d
                         {{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Disetujui Atasan</strong></td>
+                    <td>: {{ date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pejabat)) ?? "-" }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Disetujui Pimpinan</strong></td>
+                    <td>: {{ date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pimpinan)) ?? "-" }}</td>
                 </tr>
                 <tr>
                     <td><strong>Status Saat Ini</strong></td>
@@ -169,11 +179,6 @@
                     </div>
                 @endforeach
             @endif
-        </div>
-
-
-        <div class="status-label">
-            Status saat ini: <span>{{ ucfirst($cuti->status) }}</span>
         </div>
     </div>
 
