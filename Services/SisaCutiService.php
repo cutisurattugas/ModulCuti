@@ -21,8 +21,9 @@ class SisaCutiService
 
         if ($sudahAda) return;
 
-        // Ambil data cuti dari 2 tahun ke belakang (karena tahun sebelumnya bisa membawa akumulasi dari tahun sebelumnya juga)
+        // Ambil data cuti 3 tahun terakhir sebelum tahun ini
         $tahun_batas = $tahun_sekarang - 3;
+
         $cuti_sebelumnya = DB::table('cuti_sisa')
             ->where('pegawai_id', $pegawaiId)
             ->where('tahun', '>', $tahun_batas)
@@ -30,24 +31,27 @@ class SisaCutiService
             ->orderBy('tahun')
             ->get();
 
-        $cuti_dibawa = 0;
+        $total_sisa_cuti_awal = 0;
 
         foreach ($cuti_sebelumnya as $cuti) {
-            // Hitung sisa cuti tahun tersebut
-            $sisa = max($cuti->cuti_awal - $cuti->cuti_digunakan, 0);
-            $cuti_dibawa += floor($sisa / 2); // hanya cuti_awal yang dibagi
+            // Hanya cuti_awal yang dihitung
+            $sisa = max($cuti->cuti_awal, 0); // karena cuti_awal sudah berkurang saat digunakan
+            $total_sisa_cuti_awal += $sisa;
         }
 
-        // Batasi total cuti tidak lebih dari 24
+        // Hitung cuti dibawa: setengah dari total sisa cuti_awal
+        $cuti_dibawa = floor($total_sisa_cuti_awal / 2);
+
+        // Maksimal cuti total 24
         $cuti_awal = 12;
-        if ($cuti_dibawa + $cuti_awal > 24) {
+        if ($cuti_awal + $cuti_dibawa > 24) {
             $cuti_dibawa = 24 - $cuti_awal;
         }
-        
+
         DB::table('cuti_sisa')->insert([
             'pegawai_id' => $pegawaiId,
             'tahun' => $tahun_sekarang,
-            'cuti_awal' => 12,
+            'cuti_awal' => $cuti_awal,
             'cuti_dibawa' => $cuti_dibawa,
             'cuti_digunakan' => 0,
             'created_at' => now(),

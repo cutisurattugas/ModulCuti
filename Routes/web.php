@@ -39,4 +39,4 @@ Route::prefix('cuti')->group(function () {
     });
 });
 
-Route::get('/tracking-cuti/{access_token}', 'CutiController@trackingCuti')->name('cuti.tracking');
+Route::get('/scan-cuti/{access_token}', 'CutiController@scanCuti')->name('cuti.scan');

@@ -726,9 +726,9 @@ class CutiController extends Controller
         }
     }
 
-    public function trackingCuti($access_token)
+    public function scanCuti($access_token)
     {
         $cuti = Cuti::where('access_token', $access_token)->first();
-        return view('cuti::pengajuan_cuti.tracking', compact('cuti'));
+        return view('cuti::pengajuan_cuti.scan', compact('cuti'));
     }
 }
