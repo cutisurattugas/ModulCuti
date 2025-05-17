@@ -109,6 +109,9 @@ class CutiController extends Controller
      */
     public function store(Request $request)
     {
+        $username_login = auth()->user()->username;
+        $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
         // Validasi inputan
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
@@ -201,7 +204,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $data->id,
                 'status' => 'Diajukan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -313,6 +316,9 @@ class CutiController extends Controller
      */
     public function update(Request $request, $access_token)
     {
+        $username_login = auth()->user()->username;
+        $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
         // Validasi inputan
         $request->validate([
             'jenis_cuti' => 'required|exists:jenis_cuti,id',
@@ -395,7 +401,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Diedit',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             DB::commit();
@@ -410,6 +416,7 @@ class CutiController extends Controller
     // Update status cuti oleh admin
     public function approvedByKepegawaian(Request $request, $access_token)
     {
+
         // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
         if (!auth()->user()->role_aktif === 'admin') {
             return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
@@ -426,6 +433,10 @@ class CutiController extends Controller
         DB::beginTransaction();
 
         try {
+
+            $username_login = auth()->user()->username;
+            $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
             // Perbarui status menjadi "Disetujui Unit Kepegawaian"
             $cuti->status = 'Diproses';
             $cuti->catatan_kepegawaian = $request->catatan_kepegawaian;
@@ -435,7 +446,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah diteruskan ke atasan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -475,6 +486,10 @@ class CutiController extends Controller
         DB::beginTransaction();
 
         try {
+
+            $username_login = auth()->user()->username;
+            $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
             // Perbarui status menjadi "Disetujui Unit Kepegawaian"
             $cuti->status = 'Diproses';
             $cuti->tanggal_disetujui_pejabat = now();
@@ -484,7 +499,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah diteruskan ke pimpinan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             // Commit transaksi jika tidak ada error
@@ -519,6 +534,10 @@ class CutiController extends Controller
 
         DB::beginTransaction();
         try {
+
+            $username_login = auth()->user()->username;
+            $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
             $cuti->status = 'Disetujui';
             $cuti->tanggal_disetujui_pimpinan = now();
             $cuti->save();
@@ -579,7 +598,7 @@ class CutiController extends Controller
             CutiLogs::create([
                 'cuti_id' => $cuti->id,
                 'status' => 'Telah disetujui pimpinan',
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             // $waService = new WhatsappService();
@@ -620,6 +639,10 @@ class CutiController extends Controller
 
         DB::beginTransaction();
         try {
+
+            $username_login = auth()->user()->username;
+            $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+
             $cuti->status = 'Dibatalkan';
             $cuti->alasan_batal = $request->alasan_batal;
             $cuti->save();
@@ -628,7 +651,7 @@ class CutiController extends Controller
                 'cuti_id' => $cuti->id,
                 'status' => 'Dibatalkan',
                 'catatan' => $request->alasan_batal,
-                'updated_by' => auth()->user()->id,
+                'updated_by' => $username_pegawai,
             ]);
 
             // $waService = new WhatsappService();
@@ -689,6 +712,9 @@ class CutiController extends Controller
         DB::beginTransaction();
         try {
             if ($cuti->status === 'Disetujui') {
+                $username_login = auth()->user()->username;
+                $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
+                
                 // Ubah status ke "Selesai"
                 $cuti->status = 'Selesai';
                 $cuti->save();
@@ -697,7 +723,7 @@ class CutiController extends Controller
                 CutiLogs::create([
                     'cuti_id' => $cuti->id,
                     'status' => 'Selesai',
-                    'updated_by' => auth()->user()->id,
+                    'updated_by' => $username_pegawai,
                 ]);
 
                 DB::commit();
@@ -729,6 +755,7 @@ class CutiController extends Controller
     public function scanCuti($access_token)
     {
         $cuti = Cuti::where('access_token', $access_token)->first();
-        return view('cuti::pengajuan_cuti.scan', compact('cuti'));
+        $logs = CutiLogs::where('cuti_id', $cuti->id)->get();
+        return view('cuti::pengajuan_cuti.scan', compact('cuti', 'logs'));
     }
 }

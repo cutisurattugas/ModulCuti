@@ -300,9 +300,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                <strong style="display: block; margin-top: 2px;">
-                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
-                                </strong>
+                                
                             </div>
                         </div>
                         {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}<br>
@@ -318,9 +316,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                <strong style="display: block; margin-top: 2px;">
-                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
-                                </strong>
+                                
                             </div>
                         </div>
                         {{ $atasan->pegawai->gelar_dpn ?? '' }}{{ $atasan->pegawai->gelar_dpn ? ' ' : '' }}{{ $atasan->pegawai->nama }}{{ $atasan->pegawai->gelar_blk ? ', ' . $atasan->pegawai->gelar_blk : '' }}<br>
@@ -336,9 +332,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                <strong style="display: block; margin-top: 2px;">
-                                    {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}
-                                </strong>
+                                
                             </div>
                         </div>
                         {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}<br>

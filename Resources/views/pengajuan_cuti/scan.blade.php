@@ -2,105 +2,132 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Progres Pengajuan Cuti</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    .progress-bar {
-      transition: width 1s ease-in-out;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Progres Pengajuan Cuti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
 
-    .progress-step {
-      font-size: 14px;
-      font-weight: bold;
-      color: #fff;
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+        .progress-step {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-    .step-label {
-      font-size: 14px;
-      margin-top: 5px;
-    }
+        .step-label {
+            font-size: 14px;
+            margin-top: 5px;
+        }
 
-    /* Status dibatalkan */
-    .cancelled {
-      background-color: #dc3545; /* Merah untuk status dibatalkan */
-    }
+        /* Status dibatalkan */
+        .cancelled {
+            background-color: #dc3545;
+            /* Merah untuk status dibatalkan */
+        }
 
-    .cancelled .progress-bar {
-      background-color: #dc3545;
-    }
-  </style>
+        .cancelled .progress-bar {
+            background-color: #dc3545;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
 
-  <div class="container py-5">
-    <!-- Header -->
-    <div class="text-center mb-5">
-      <h2 class="fw-bold">
-        Persetujuan Pengajuan Cuti Pegawai
-      </h2>
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">
+                Persetujuan Pengajuan Cuti Pegawai
+            </h2>
+        </div>
+
+        <!-- Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <p><strong>Nama:</strong><br>
+                            {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}
+                        </p>
+                        <p><strong>NIP:</strong><br> {{ $cuti->pegawai->nip }}</p>
+                        <p><strong>Jenis Cuti:</strong><br> {{ $cuti->jenis_cuti->nama_cuti }}</p>
+                        <p><strong>Status Saat Ini:</strong><br>
+                            <span class="fw-bold text-primary">{{ ucfirst($cuti->status) }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Tanggal Cuti:</strong><br>
+                            {{ date('d M Y', strtotime($cuti->tanggal_mulai)) }} s.d
+                            {{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}
+                        </p>
+                        <p><strong>Disetujui Atasan:</strong><br>
+                            {{ $cuti->tanggal_disetujui_pejabat ? date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pejabat)) : '-' }}
+                        </p>
+                        <p><strong>Disetujui Pimpinan:</strong><br>
+                            {{ $cuti->tanggal_disetujui_pimpinan ? date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pimpinan)) : '-' }}
+                        </p>
+                    </div>
+                </div>
+
+                @php
+                    $status = strtolower($cuti->status);
+                    $steps = ['Diajukan', 'Diproses', 'Disetujui', 'Selesai'];
+                    $currentIndex = array_search(ucfirst($cuti->status), $steps);
+                    $progress = ($currentIndex / (count($steps) - 1)) * 100; // Calculate percentage
+                @endphp
+
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%"
+                        aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-step">{{ $steps[$currentIndex] }}</div>
+                    </div>
+                </div>
+
+                <!-- Labels for progress steps -->
+                <div class="d-flex justify-content-between mt-3">
+                    @foreach ($steps as $index => $step)
+                        <div class="step-label {{ $index <= $currentIndex ? 'text-primary' : 'text-muted' }}">
+                            {{ $step }}</div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- card 2 --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Aktor</th>
+                            <th>Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($logs as $item)
+                            <tr>
+                                <td>{{ $item->status }}</td>
+                                <td>
+                                  {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
+                                </td>
+                                <td>{{ date('d M Y: H:i:s', strtotime($item->created_at)) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Card -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <p><strong>Nama:</strong><br>
-              {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}
-            </p>
-            <p><strong>NIP:</strong><br> {{ $cuti->pegawai->nip }}</p>
-            <p><strong>Jenis Cuti:</strong><br> {{ $cuti->jenis_cuti->nama_cuti }}</p>
-            <p><strong>Status Saat Ini:</strong><br>
-              <span class="fw-bold text-primary">{{ ucfirst($cuti->status) }}</span>
-            </p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Tanggal Cuti:</strong><br>
-              {{ date('d M Y', strtotime($cuti->tanggal_mulai)) }} s.d {{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}
-            </p>
-            <p><strong>Disetujui Atasan:</strong><br>
-              {{ $cuti->tanggal_disetujui_pejabat ? date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pejabat)) : '-' }}
-            </p>
-            <p><strong>Disetujui Pimpinan:</strong><br>
-              {{ $cuti->tanggal_disetujui_pimpinan ? date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pimpinan)) : '-' }}
-            </p>
-          </div>
-        </div>
-
-        @php
-          $status = strtolower($cuti->status);
-          $steps = ['Diajukan', 'Diproses', 'Disetujui', 'Selesai'];
-          $currentIndex = array_search(ucfirst($cuti->status), $steps);
-          $progress = (($currentIndex) / (count($steps) - 1)) * 100; // Calculate percentage
-        @endphp
-
-        <div class="progress" style="height: 30px;">
-          <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%" aria-valuenow="{{ $progress }}"
-            aria-valuemin="0" aria-valuemax="100">
-            <div class="progress-step">{{ $steps[$currentIndex] }}</div>
-          </div>
-        </div>
-
-        <!-- Labels for progress steps -->
-        <div class="d-flex justify-content-between mt-3">
-          @foreach ($steps as $index => $step)
-          <div class="step-label {{ $index <= $currentIndex ? 'text-primary' : 'text-muted' }}">
-            {{ $step }}</div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

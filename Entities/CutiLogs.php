@@ -19,6 +19,6 @@ class CutiLogs extends Model
         return $this->belongsTo(Cuti::class, 'cuti_id', 'id');
     }
     public function pegawai(){
-        return $this->belongsTo(Pegawai::class, 'updated_by', 'username');
+        return $this->belongsTo(Pegawai::class, 'updated_by', 'id');
     }
 }
