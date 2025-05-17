@@ -64,7 +64,7 @@
                                 $badgeClass = 'light';
                         }
                     @endphp
-                    <span class="badge rounded-pill bg-{{ $badgeClass }}">{{ $status }}</span>
+                    <span class="badge rounded-pill bg-{{ $badgeClass }}"><a href="{{route('cuti.scan', $item->access_token)}}">{{ $status }}</a></span>
                 </center>
             </td>
 
