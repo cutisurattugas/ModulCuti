@@ -14,6 +14,8 @@
                         @include('layouts.partials.messages')
                     </div>
                     <form method="GET" action="{{ route('rekap.index') }}" class="form-inline mb-3">
+
+                        <!-- Tahun -->
                         <label for="tahun" class="mr-2">Tahun:</label>
                         <select name="tahun" id="tahun" class="form-control mr-2">
                             @foreach ($daftarTahun as $thn)
@@ -22,9 +24,24 @@
                             @endforeach
                         </select>
 
+                        <!-- Nama Pegawai -->
+                        <input type="text" name="nama" class="form-control mr-2" placeholder="Cari nama pegawai..."
+                            value="{{ request('nama') }}">
+
+                        <!-- Rentang Tanggal -->
+                        <label class="mr-2">Dari:</label>
+                        <input type="date" name="tanggal_awal" class="form-control mr-2"
+                            value="{{ request('tanggal_awal') }}">
+                        <label class="mr-2">Sampai:</label>
+                        <input type="date" name="tanggal_akhir" class="form-control mr-2"
+                            value="{{ request('tanggal_akhir') }}">
+
                         <button type="submit" class="btn btn-primary">Filter</button>
                     </form>
-
+                    <!-- Tombol Print -->
+                    <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#printModal">
+                        <i class="fas fa-print"></i> Print
+                    </button>
 
                     <table class="table table-bordered">
                         <tr>
@@ -106,6 +123,33 @@
             </div>
         </div>
     </div>
+    <!-- Modal Pilih Format Print -->
+    <div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pilih Format Print</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Silakan pilih format export data rekap cuti:</p>
+                    <div class="d-flex justify-content-around">
+                        <a href="{{ route('rekap.export.pdf', request()->query()) }}" class="btn btn-danger">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                        <a href="{{ route('rekap.export.excel', request()->query()) }}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @stop
 @section('adminlte_js')
