@@ -36,6 +36,8 @@ Route::prefix('cuti')->group(function () {
     Route::prefix('rekap')->group(function () {
         Route::get('/', 'RekapCutiController@index')->name('rekap.index');
         Route::get('/show/{id}', 'RekapCutiController@show')->name('rekap.show');
+        Route::get('export/pdf', 'RekapCutiController@exportPdf')->name('rekap.export.pdf');
+        Route::get('export/excel', 'RekapCutiController@exportExcel')->name('rekap.export.excel');
     });
 });
 
