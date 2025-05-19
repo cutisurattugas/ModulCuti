@@ -127,29 +127,37 @@
     <div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Pilih Format Print</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <form method="GET" id="exportForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pilih Format Print</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
-                <div class="modal-body">
-                    <p>Silakan pilih format export data rekap cuti:</p>
-                    <div class="d-flex justify-content-around">
-                        <a href="{{ route('rekap.export.pdf', request()->query()) }}" class="btn btn-danger">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </a>
-                        <a href="{{ route('rekap.export.excel', request()->query()) }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Excel
-                        </a>
+                    <div class="modal-body">
+                        <p>Silakan pilih format export data rekap cuti:</p>
+
+                        {{-- Hidden Inputs untuk filter --}}
+                        <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                        <input type="hidden" name="nama" value="{{ request('nama') }}">
+                        <input type="hidden" name="tanggal_awal" value="{{ request('tanggal_awal') }}">
+                        <input type="hidden" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}">
+
+                        <div class="d-flex justify-content-around">
+                            <button type="submit" formaction="{{ route('rekap.export.pdf') }}" class="btn btn-danger">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button type="submit" formaction="{{ route('rekap.export.excel') }}" class="btn btn-success">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-
 
 @stop
 @section('adminlte_js')

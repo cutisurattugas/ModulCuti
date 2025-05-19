@@ -91,7 +91,15 @@ class CutiController extends Controller
         // Ambil data sisa cuti tahun ini
         $ambilCuti = DB::table('cuti_sisa')->where('pegawai_id', $pegawai->id)->where('tahun', Carbon::now()->year)->first();
         $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa;
-        // dd($sisa_cuti);
+
+        // Filter: jika sisa cuti 0, hilangkan jenis cuti dengan id = 1
+        if ($sisa_cuti == 0) {
+            $jenis_cuti = $jenis_cuti->reject(function ($item) {
+                return $item->id == 1;
+            });
+        }
+
+        // dd($jenis_cuti);
         return view('cuti::pengajuan_cuti.create', compact(
             'jenis_cuti',
             'pegawai',
@@ -714,7 +722,7 @@ class CutiController extends Controller
             if ($cuti->status === 'Disetujui') {
                 $username_login = auth()->user()->username;
                 $username_pegawai = Pegawai::where('username', $username_login)->first()->id;
-                
+
                 // Ubah status ke "Selesai"
                 $cuti->status = 'Selesai';
                 $cuti->save();
@@ -729,10 +737,10 @@ class CutiController extends Controller
                 DB::commit();
 
                 // Kirim WA
-                $waService = new WhatsappService();
-                $username = $cuti->pegawai->username;
-                $message = "Cuti anda telah selesai di proses";
-                $waService->sendMessage($username, $message);
+                // $waService = new WhatsappService();
+                // $username = $cuti->pegawai->username;
+                // $message = "Cuti anda telah selesai di proses";
+                // $waService->sendMessage($username, $message);
             }
 
             // Jika status sudah "Selesai", atau baru saja diubah ke "Selesai", tetap buat QR dan tampilkan PDF

@@ -201,11 +201,12 @@ class RekapCutiController extends Controller
             'filterNama' => $request->input('filter_nama'), // bisa null
             'tanggalAwal' => $request->input('tanggal_awal'), // bisa null
             'tanggalAkhir' => $request->input('tanggal_akhir'), // bisa null
-        ])->download('rekap-cuti-'.$tahun.'.pdf');
+        ])->download('rekap-cuti-' . $tahun . '.pdf');
     }
 
     public function exportExcel(Request $request)
     {
-        return Excel::download(new RekapCutiExport($request), 'rekap-cuti.xlsx');
+        $filters = $request->only(['tahun', 'nama', 'tanggal_awal', 'tanggal_akhir']);
+        return Excel::download(new RekapCutiExport($filters), 'rekap-cuti.xlsx');
     }
 }
