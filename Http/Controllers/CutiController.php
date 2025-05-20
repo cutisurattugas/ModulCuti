@@ -25,6 +25,7 @@ use Modules\Pengaturan\Entities\TimKerja;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Modules\Cuti\Services\FonnteService;
 
 class CutiController extends Controller
 {
@@ -217,6 +218,16 @@ class CutiController extends Controller
 
             // Commit transaksi jika tidak ada error
             DB::commit();
+
+            // Send Whatsapp via fonnte
+            $fonnte = new FonnteService();
+            $target = '6287785390241';
+            $message = Pegawai::where('id', $username_pegawai)->first()->nama;
+            $response = $fonnte->sendText($target, $message . ' mengajukan cuti', [
+                'typing' => true,
+                'delay' => 2,
+                'countryCode' => '62',
+            ]);
 
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diajukan.');
         } catch (\Throwable $th) {
@@ -465,6 +476,16 @@ class CutiController extends Controller
             // $message = "Cuti anda telah diteruskan ke atasan.";
             // $result = $waService->sendMessage($username, $message);
 
+            // Send Whatsapp via Fonnte
+            $fonnte = new FonnteService();
+            $target = '6287785390241';
+            $message = Pegawai::where('id', $username_pegawai)->first()->nama;
+            $response = $fonnte->sendText($target, $message . ' (Kepegawaian) meneruskan pengajuan ke atasan', [
+                'typing' => true,
+                'delay' => 2,
+                'countryCode' => '62',
+            ]);
+
             // Redirect ke halaman pengajuan cuti
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke atasan.');
         } catch (\Throwable $th) {
@@ -517,6 +538,16 @@ class CutiController extends Controller
             // $username = $cuti->pegawai->username;
             // $message = "Cuti anda telah disetujui atasan.";
             // $result = $waService->sendMessage($username, $message);
+
+            // Send Whatsapp via Fonnte
+            $fonnte = new FonnteService();
+            $target = '6287785390241';
+            $message = Pegawai::where('id', $username_pegawai)->first()->nama;
+            $response = $fonnte->sendText($target, $message . ' (atasan) telah menyetujui', [
+                'typing' => true,
+                'delay' => 2,
+                'countryCode' => '62',
+            ]);
 
             // Redirect ke halaman pengajuan cuti
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil diteruskan ke pimpinan.');
@@ -614,6 +645,16 @@ class CutiController extends Controller
             // $message = "Cuti anda telah disetujui pimpinan.";
             // $result = $waService->sendMessage($username, $message);
 
+            // Send Whatsapp via Fonnte
+            $fonnte = new FonnteService();
+            $target = '6287785390241';
+            $message = Pegawai::where('id', $username_pegawai)->first()->nama;
+            $response = $fonnte->sendText($target, $message . ' (pimpinan) telah menyetujui', [
+                'typing' => true,
+                'delay' => 2,
+                'countryCode' => '62',
+            ]);
+
             DB::commit();
             return redirect()->route('cuti.index')->with('success', 'Cuti telah disetujui.');
         } catch (\Throwable $th) {
@@ -666,6 +707,16 @@ class CutiController extends Controller
             // $username = $cuti->pegawai->username;
             // $message = "Cuti anda telah telah dibatalkan";
             // $result = $waService->sendMessage($username, $message);
+
+            // Send Whatsapp via Fonnte
+            $fonnte = new FonnteService();
+            $target = '6287785390241';
+            $message = Pegawai::where('id', $username_pegawai)->first()->nama;
+            $response = $fonnte->sendText($target, $message . ' telah membatalkan pengajuan cuti anda dengan alasan ' . $request->alasan_batal, [
+                'typing' => true,
+                'delay' => 2,
+                'countryCode' => '62',
+            ]);
 
             DB::commit();
             return redirect()->route('cuti.index')->with('success', 'Cuti berhasil dibatalkan.');
@@ -741,6 +792,16 @@ class CutiController extends Controller
                 // $username = $cuti->pegawai->username;
                 // $message = "Cuti anda telah selesai di proses";
                 // $waService->sendMessage($username, $message);
+
+                // Send Whatsapp via Fonnte
+                $fonnte = new FonnteService();
+                $target = '6287785390241';
+                $message = 'Pengajuan Cuti anda telah selesai';
+                $response = $fonnte->sendText($target, $message, [
+                    'typing' => true,
+                    'delay' => 2,
+                    'countryCode' => '62',
+                ]);
             }
 
             // Jika status sudah "Selesai", atau baru saja diubah ke "Selesai", tetap buat QR dan tampilkan PDF
