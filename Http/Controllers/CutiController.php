@@ -53,7 +53,7 @@ class CutiController extends Controller
             $cuti = Cuti::whereHas('logs', function ($query) {
                 $query->where('status', 'Telah diteruskan ke pimpinan');
             })->latest()->get();
-        } elseif ($role == 'kajur') {
+        } elseif (in_array($role, ['kajur', 'wadir1', 'wadir2', 'wadir3'])) {
             // Atasan: lihat semua cuti yang diteruskan ke atasan dan pejabat_id sesuai
             $cuti_anggota = Cuti::where('pejabat_id', $pejabat_id)
                 ->whereHas('logs', function ($query) {
@@ -62,7 +62,7 @@ class CutiController extends Controller
 
             // Cuti pribadi tetap bisa dilihat
             $cuti_pribadi = Cuti::where('pegawai_id', $pegawai_id)->latest()->get();
-        } elseif ($role == 'dosen') {
+        } elseif (in_array($role, ['pegawai', 'dosen'])) {
             // Pegawai biasa hanya bisa lihat cuti dirinya sendiri
             $cuti_pribadi = Cuti::where('pegawai_id', $pegawai_id)->latest()->get();
         }

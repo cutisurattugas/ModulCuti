@@ -19,33 +19,34 @@ class AtasanService
         // 1️⃣ Cek apakah pegawai adalah ketua di salah satu unit
         foreach ($keanggotaan as $anggota) {
             $tim = TimKerja::find($anggota->tim_kerja_id);
+
             if (
                 strtolower($anggota->peran) === 'ketua' ||
                 ($tim?->ketua && $tim->ketua->pegawai_id == $pegawaiId)
             ) {
-                // Jika dia ketua, naik ke atas langsung (Wadir atau Direktur)
+                // Jika dia ketua, cari ketua dari unit di atasnya (satu level saja, tidak naik terus)
                 $parentUnit = $tim?->parentUnit;
 
-                while ($parentUnit) {
+                if ($parentUnit) {
                     $ketua = Pejabat::find($parentUnit->ketua_id);
                     if ($ketua && $ketua->pegawai_id != $pegawaiId) {
                         return $ketua;
                     }
-                    $parentUnit = $parentUnit->parentUnit;
                 }
+
+                // Jika tidak ada parent atau tidak ketemu ketua, tidak usah naik lebih jauh
+                return null;
             }
         }
 
-        // 2️⃣ Jika bukan ketua di mana pun, ambil salah satu unit anggota dan naik satu level (dari prodi ke jurusan)
+        // 2️⃣ Jika bukan ketua, ambil ketua langsung dari unit kerja pertamanya saja
         $firstUnit = TimKerja::find($keanggotaan->first()->tim_kerja_id);
-        $tim = $firstUnit?->parentUnit;
 
-        while ($tim) {
-            $ketua = Pejabat::find($tim->ketua_id);
+        if ($firstUnit && $firstUnit->ketua_id) {
+            $ketua = Pejabat::find($firstUnit->ketua_id);
             if ($ketua && $ketua->pegawai_id != $pegawaiId) {
                 return $ketua;
             }
-            $tim = $tim->parentUnit; // naik terus kalau belum ketemu
         }
 
         return null;
