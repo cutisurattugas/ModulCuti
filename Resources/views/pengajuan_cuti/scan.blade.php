@@ -73,6 +73,12 @@
                         <p><strong>Disetujui Pimpinan:</strong><br>
                             {{ $cuti->tanggal_disetujui_pimpinan ? date('d M Y: H:i:s', strtotime($cuti->tanggal_disetujui_pimpinan)) : '-' }}
                         </p>
+                        @if (!empty($cuti->alasan_batal))
+                            <p><strong>Alasan Pembatalan:</strong><br>
+                                {{ $cuti->alasan_batal }}
+                            </p>
+                        @endif
+
                     </div>
                 </div>
 
@@ -116,7 +122,7 @@
                             <tr>
                                 <td>{{ $item->status }}</td>
                                 <td>
-                                  {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
+                                    {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
                                 </td>
                                 <td>{{ date('d M Y: H:i:s', strtotime($item->created_at)) }}</td>
                             </tr>

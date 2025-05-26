@@ -133,9 +133,15 @@
                         <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows="" readonly>{{ $cuti->keterangan }}</textarea>
                     </div>
                     @if (auth()->user()->role_aktif != 'admin')
+                        @php
+                            $label = !empty($cuti->catatan_kepegawaian) ? 'Catatan Kepegawaian' : 'Alasan Pembatalan';
+                            $value = $cuti->catatan_kepegawaian ?? $cuti->alasan_batal;
+                        @endphp
+
                         <div class="mb-3">
-                            <label for="catatan_kepegawaian" class="form-label">Catatan Kepegawaian</label>
-                            <textarea class="form-control" name="catatan_kepegawaian" id="catatan_kepegawaian" cols="10" rows="" readonly>{{ $cuti->catatan_kepegawaian }}</textarea>
+                            <label for="catatan_kepegawaian" class="form-label">{{ $label }}</label>
+                            <textarea class="form-control" name="catatan_kepegawaian" id="catatan_kepegawaian" cols="10" rows="3"
+                                readonly>{{ $value }}</textarea>
                         </div>
                     @endif
                     @php
@@ -197,7 +203,8 @@
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
                                 <div class="col mb-2 me-2" style="max-width: 100px;">
-                                    <form action="{{ route('cuti.approve.pimpinan', $cuti->access_token) }}" method="POST">
+                                    <form action="{{ route('cuti.approve.pimpinan', $cuti->access_token) }}"
+                                        method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-primary w-100">Setujui</button>
                                     </form>
