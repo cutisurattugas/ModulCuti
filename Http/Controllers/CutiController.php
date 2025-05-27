@@ -191,7 +191,7 @@ class CutiController extends Controller
 
             // Generate access token
             $uuid = Str::uuid()->toString();
-            $access_token = substr($uuid, 0, 12);
+            $access_token = $uuid;
 
             // Insert data ke tabel cuti
             $data = Cuti::create([
@@ -498,8 +498,8 @@ class CutiController extends Controller
 
     public function approvedByAtasan(Request $request, $access_token)
     {
-        // Pastikan hanya unit kepegawaian (admin) yang bisa menyetujui
-        if (!auth()->user()->role_aktif === 'operator') {
+        // Pastikan hanya unit ketua jurusan yang bisa menyetujui
+        if (!auth()->user()->role_aktif === 'kajur') {
             return redirect()->route('cuti.index')->with('danger', 'Anda tidak memiliki hak akses untuk menyetujui cuti.');
         }
 
