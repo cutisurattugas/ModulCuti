@@ -143,12 +143,72 @@
 @stop
 
 @section('adminlte_js')
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr "></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        flatpickr('#rentang_cuti', {
-            mode: 'range',
-            dateFormat: 'Y-m-d',
-            allowInput: true,
+        document.addEventListener('DOMContentLoaded', function () {
+            const sisaCuti = {{ $sisa_cuti }};
+            let startDate = null;
+
+            const existingRange = "{{ $cuti->tanggal_mulai }} to {{ $cuti->tanggal_selesai }}";
+
+            const fp = flatpickr('#rentang_cuti', {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                allowInput: false,
+                minDate: "{{ now()->format('Y-m-d') }}",
+                defaultDate: existingRange.split(" to "),
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 1) {
+                        startDate = selectedDates[0];
+                        const maxDate = calculateMaxDate(startDate, sisaCuti);
+                        instance.set('maxDate', maxDate);
+                    } else if (selectedDates.length === 2) {
+                        const workingDays = countWorkingDays(selectedDates[0], selectedDates[1]);
+
+                        if (workingDays > sisaCuti) {
+                            alert(`Anda hanya memiliki ${sisaCuti} hari cuti tersedia. Rentang yang dipilih mencakup ${workingDays} hari kerja.`);
+                            instance.clear();
+                            startDate = null;
+                        }
+                    }
+                },
+                onClose: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 1) {
+                        instance.open(); // biarkan terbuka jika baru pilih 1 tanggal
+                    }
+                }
+            });
+
+            function calculateMaxDate(startDate, days) {
+                let count = 0;
+                let currentDate = new Date(startDate);
+                let resultDate = new Date(startDate);
+
+                while (count < days) {
+                    currentDate.setDate(currentDate.getDate() + 1);
+                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                        count++;
+                    }
+                    resultDate = new Date(currentDate);
+                }
+
+                return resultDate;
+            }
+
+            function countWorkingDays(start, end) {
+                let count = 0;
+                let current = new Date(start);
+
+                while (current <= end) {
+                    if (current.getDay() !== 0 && current.getDay() !== 6) {
+                        count++;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+
+                return count;
+            }
         });
     </script>
 @stop
+

@@ -107,7 +107,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="keterangan" class="form-label">Keterangan</label>
-                            <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows=""></textarea>
+                            <textarea class="form-control" name="keterangan" id="keterangan" cols="10" rows="" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="{{ route('cuti.index') }}" class="btn btn-default">Kembali</a>
