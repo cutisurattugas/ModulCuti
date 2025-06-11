@@ -13,7 +13,7 @@
                     <div class="mt-2">
                         @include('layouts.partials.messages')
                     </div>
-                    <form method="GET" action="{{ route('rekap.index') }}" class="form-inline mb-3">
+                    <form method="GET" action="{{ route('rekap.cuti.index') }}" class="form-inline mb-3">
 
                         <!-- Tahun -->
                         <label for="tahun" class="mr-2">Tahun:</label>
@@ -146,10 +146,10 @@
                         <input type="hidden" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}">
 
                         <div class="d-flex justify-content-around">
-                            <button type="submit" formaction="{{ route('rekap.export.pdf') }}" class="btn btn-danger">
+                            <button type="submit" formaction="{{ route('rekap.cuti.export.pdf') }}" class="btn btn-danger">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </button>
-                            <button type="submit" formaction="{{ route('rekap.export.excel') }}" class="btn btn-success">
+                            <button type="submit" formaction="{{ route('rekap.cuti.export.excel') }}" class="btn btn-success">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
                         </div>

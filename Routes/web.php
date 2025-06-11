@@ -34,10 +34,10 @@ Route::prefix('cuti')->group(function () {
         Route::delete('/destroy/{id}', 'JenisCutiController@destroy')->name('jenis_cuti.destroy');
     });
     Route::prefix('rekap')->group(function () {
-        Route::get('/', 'RekapCutiController@index')->name('rekap.index');
-        Route::get('/show/{id}', 'RekapCutiController@show')->name('rekap.show');
-        Route::get('export/pdf', 'RekapCutiController@exportPdf')->name('rekap.export.pdf');
-        Route::get('export/excel', 'RekapCutiController@exportExcel')->name('rekap.export.excel');
+        Route::get('/', 'RekapCutiController@index')->name('rekap.cuti.index');
+        Route::get('/show/{id}', 'RekapCutiController@show')->name('rekap.cuti.show');
+        Route::get('export/pdf', 'RekapCutiController@exportPdf')->name('rekap.cuti.export.pdf');
+        Route::get('export/excel', 'RekapCutiController@exportExcel')->name('rekap.cuti.export.excel');
     });
 });
 
