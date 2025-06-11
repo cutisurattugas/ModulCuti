@@ -1,9 +1,11 @@
 <table class="table table-bordered">
     <tr>
         <th width="1%">No</th>
-        <th>
-            <center>Nama</center>
-        </th>
+        @if(!isset($hide_nama) || !$hide_nama)  <!-- Jika hide_nama = false, tampilkan kolom Nama -->
+            <th>
+                <center>Nama</center>
+            </th>
+        @endif
         <th>
             <center>Jumlah Cuti</center>
         </th>
@@ -25,11 +27,13 @@
             <td>
                 <center>{{ $loop->iteration }}</center>
             </td>
-            <td>
-                <center>
-                    {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
-                </center>
-            </td>
+            @if(!isset($hide_nama) || !$hide_nama)  <!-- Jika hide_nama = false, tampilkan data Nama -->
+                <td>
+                    <center>
+                        {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
+                    </center>
+                </td>
+            @endif
             <td>
                 <center>{{ $item->jumlah_cuti }} Hari</center>
             </td>
@@ -67,7 +71,6 @@
                     <span class="badge rounded-pill bg-{{ $badgeClass }}"><a href="{{route('cuti.scan', $item->access_token)}}">{{ $status }}</a></span>
                 </center>
             </td>
-
             <td>
                 <center>
                     <a class="btn btn-info btn-sm" href="{{ route('cuti.show', $item->access_token) }}">
@@ -89,11 +92,10 @@
                     @endif
                 </center>
             </td>
-
         </tr>
     @empty
         <tr>
-            <td colspan="7" class="text-center">Belum ada data cuti</td>
+            <td colspan="{{ (isset($hide_nama) && $hide_nama) ? '6' : '7' }}" class="text-center">Belum ada data cuti</td>
         </tr>
     @endforelse
 </table>

@@ -48,6 +48,7 @@
                             <div class="tab-pane fade show active" id="pribadi" role="tabpanel">
                                 @include('cuti::pengajuan_cuti.components.tabel', [
                                     'cuti_data' => $cuti_pribadi,
+                                    'hide_nama' => true, // <-- Tambahkan parameter ini
                                 ])
                             </div>
                         @endif
@@ -57,6 +58,7 @@
                                 role="tabpanel">
                                 @include('cuti::pengajuan_cuti.components.tabel', [
                                     'cuti_data' => $cuti_anggota,
+                                    'hide_nama' => false, // <-- Pastikan kolom nama tetap muncul
                                 ])
                             </div>
                         @endif
@@ -64,11 +66,13 @@
                         @if ($cuti)
                             <div class="tab-pane fade {{ !$cuti_pribadi && !$cuti_anggota ? 'show active' : '' }}"
                                 id="semua" role="tabpanel">
-                                @include('cuti::pengajuan_cuti.components.tabel', ['cuti_data' => $cuti])
+                                @include('cuti::pengajuan_cuti.components.tabel', [
+                                    'cuti_data' => $cuti,
+                                    'hide_nama' => false, // <-- Kolom nama tetap muncul
+                                ])
                             </div>
                         @endif
                     </div>
-
 
                     <div class="d-flex">
                         {{-- {!! $cuti->links('pagination::bootstrap-4') !!} --}}
