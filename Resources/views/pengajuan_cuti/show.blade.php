@@ -174,7 +174,7 @@
                                 <button class="btn btn-secondary w-100" onclick="history.back()">Kembali</button>
                             </div>
                         </div>
-                    @elseif(auth()->user()->role_aktif === 'kajur' && !$isPemohon)
+                    @elseif(in_array(auth()->user()->role_aktif, ['kajur', 'kaunit', 'wadir1', 'wadir2', 'wadir3']) && !$isPemohon)
                         {{-- Atasan sebagai pemeriksa --}}
                         <div class="row mt-2">
                             @if (!in_array($cuti->status, ['Dibatalkan', 'Disetujui', 'Selesai']))
