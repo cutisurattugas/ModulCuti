@@ -1,7 +1,8 @@
 <table class="table table-bordered">
     <tr>
         <th width="1%">No</th>
-        @if(!isset($hide_nama) || !$hide_nama)  <!-- Jika hide_nama = false, tampilkan kolom Nama -->
+        @if (!isset($hide_nama) || !$hide_nama)
+            <!-- Jika hide_nama = false, tampilkan kolom Nama -->
             <th>
                 <center>Nama</center>
             </th>
@@ -27,7 +28,8 @@
             <td>
                 <center>{{ $loop->iteration }}</center>
             </td>
-            @if(!isset($hide_nama) || !$hide_nama)  <!-- Jika hide_nama = false, tampilkan data Nama -->
+            @if (!isset($hide_nama) || !$hide_nama)
+                <!-- Jika hide_nama = false, tampilkan data Nama -->
                 <td>
                     <center>
                         {{ $item->pegawai->gelar_dpn ?? '' }}{{ $item->pegawai->gelar_dpn ? ' ' : '' }}{{ $item->pegawai->nama }}{{ $item->pegawai->gelar_blk ? ', ' . $item->pegawai->gelar_blk : '' }}
@@ -68,7 +70,13 @@
                                 $badgeClass = 'light';
                         }
                     @endphp
-                    <span class="badge rounded-pill bg-{{ $badgeClass }}"><a href="{{route('cuti.scan', $item->access_token)}}">{{ $status }}</a></span>
+                    <span class="badge rounded-pill bg-{{ $badgeClass }}">
+                        <a href="#" class="open-cuti-iframe text-white text-decoration-none"
+                            data-url="{{ route('cuti.scan', $item->access_token) }}">
+                            {{ $status }}
+                        </a>
+                    </span>
+
                 </center>
             </td>
             <td>
@@ -95,7 +103,8 @@
         </tr>
     @empty
         <tr>
-            <td colspan="{{ (isset($hide_nama) && $hide_nama) ? '6' : '7' }}" class="text-center">Belum ada data cuti</td>
+            <td colspan="{{ isset($hide_nama) && $hide_nama ? '6' : '7' }}" class="text-center">Belum ada data cuti
+            </td>
         </tr>
     @endforelse
 </table>
