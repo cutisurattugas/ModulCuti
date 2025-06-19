@@ -93,7 +93,7 @@
                         </a>
                     @endif
 
-                    @if (auth()->user()->role_aktif === 'admin' || auth()->user()->username === $item->pegawai->username)
+                    @if ($item->status !== 'Selesai')
                         <a class="btn btn-warning btn-sm" href="{{ route('cuti.edit', $item->access_token) }}">
                             <i class="nav-icon fas fa-edit"></i>
                         </a>

@@ -122,8 +122,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sisaCuti = {{ $sisa_cuti }};
+            const jenisCutiData = @json($jenis_cuti); // Data jenis cuti dari controller
             let startDate = null;
-            
+            let currentMaxDays = sisaCuti; // Default ke sisa cuti tahunan
+
             const fp = flatpickr('#rentang_cuti', {
                 mode: 'range',
                 dateFormat: 'Y-m-d',
@@ -131,18 +133,26 @@
                 allowInput: false,
                 onChange: function(selectedDates, dateStr, instance) {
                     if (selectedDates.length === 1) {
-                        // Tanggal awal dipilih, set max date berdasarkan sisa cuti
+                        // Tanggal awal dipilih, set max date berdasarkan batas cuti
                         startDate = selectedDates[0];
-                        const maxDate = calculateMaxDate(startDate, sisaCuti);
+                        const maxDate = calculateMaxDate(startDate, currentMaxDays);
                         instance.set('maxDate', maxDate);
                     } else if (selectedDates.length === 2) {
                         // Validasi total hari kerja
                         const workingDays = countWorkingDays(selectedDates[0], selectedDates[1]);
-                        
-                        if (workingDays > sisaCuti) {
-                            alert(`Anda hanya memiliki ${sisaCuti} hari cuti tersedia. Rentang yang dipilih mencakup ${workingDays} hari kerja.`);
+
+                        if (workingDays > currentMaxDays) {
+                            const jenisCutiSelect = document.getElementById('jenis_cuti');
+                            const selectedOption = jenisCutiSelect.options[jenisCutiSelect
+                                .selectedIndex];
+                            const jenisCutiNama = selectedOption.text || 'cuti';
+
+                            alert(
+                                `Untuk ${jenisCutiNama}, Anda hanya dapat mengambil maksimal ${currentMaxDays} hari. Rentang yang dipilih mencakup ${workingDays} hari kerja.`);
                             instance.clear();
                             startDate = null;
+                            // Reset maxDate
+                            instance.set('maxDate', null);
                         }
                     }
                 },
@@ -153,13 +163,42 @@
                     }
                 }
             });
-            
-            // Fungsi menghitung max date berdasarkan tanggal awal dan sisa cuti
+
+            // Event listener untuk perubahan jenis cuti
+            document.getElementById('jenis_cuti').addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                if (selectedValue) {
+                    // Cari data jenis cuti yang dipilih
+                    const selectedJenisCuti = jenisCutiData.find(item => item.id == selectedValue);
+
+                    if (selectedJenisCuti) {
+                        if (selectedValue == 1) { // Cuti Tahunan
+                            currentMaxDays = sisaCuti;
+                        } else {
+                            // Untuk jenis cuti lainnya, gunakan jumlah_cuti dari data
+                            currentMaxDays = selectedJenisCuti.jumlah_cuti || 1;
+                        }
+                    }
+                } else {
+                    // Jika tidak ada yang dipilih, default ke sisa cuti tahunan
+                    currentMaxDays = sisaCuti;
+                }
+
+                // Reset date picker jika ada tanggal yang sudah dipilih
+                if (fp.selectedDates.length > 0) {
+                    fp.clear();
+                    startDate = null;
+                    fp.set('maxDate', null);
+                }
+            });
+
+            // Fungsi menghitung max date berdasarkan tanggal awal dan jumlah hari
             function calculateMaxDate(startDate, days) {
                 let count = 0;
                 let currentDate = new Date(startDate);
                 let resultDate = new Date(startDate);
-                
+
                 while (count < days) {
                     currentDate.setDate(currentDate.getDate() + 1);
                     if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
@@ -167,22 +206,22 @@
                     }
                     resultDate = new Date(currentDate);
                 }
-                
+
                 return resultDate;
             }
-            
+
             // Fungsi menghitung hari kerja dalam rentang
             function countWorkingDays(start, end) {
                 let count = 0;
                 let current = new Date(start);
-                
+
                 while (current <= end) {
                     if (current.getDay() !== 0 && current.getDay() !== 6) {
                         count++;
                     }
                     current.setDate(current.getDate() + 1);
                 }
-                
+
                 return count;
             }
         });
