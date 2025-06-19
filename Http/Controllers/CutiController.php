@@ -91,8 +91,14 @@ class CutiController extends Controller
      */
     public function create()
     {
-        $jenis_cuti = JenisCuti::all();
         $pegawai = Pegawai::where('username', auth()->user()->username)->first();
+        if ($pegawai->jenis_kelamin === 'L') {
+            // Laki-laki tidak bisa mengambil cuti melahirkan (id = 3)
+            $jenis_cuti = JenisCuti::where('id', '!=', 3)->get();
+        } elseif ($pegawai->jenis_kelamin === 'P') {
+            // Perempuan tidak bisa mengambil cuti pendampingan istri melahirkan (id = 5)
+            $jenis_cuti = JenisCuti::where('id', '!=', 5)->get();
+        }
 
         $anggota = Anggota::where('pegawai_id', $pegawai->id)->first();
         $tim = TimKerja::find($anggota->tim_kerja_id ?? null); // jika ada
@@ -143,16 +149,16 @@ class CutiController extends Controller
         ]);
 
         // Get data pimpinan
-        if(in_array(auth()->user()->role_aktif, [ 'pegawai', 'dosen'])){
+        if (in_array(auth()->user()->role_aktif, ['pegawai', 'dosen'])) {
             $atasan = Pejabat::firstWhere('id', $request->pejabat_id);
             $idPegawaiAtasan = Pegawai::firstWhere('id', $atasan->pegawai_id)->id;
             $atasanService = new AtasanService();
             $pimpinan = $atasanService->getAtasanPegawai($idPegawaiAtasan);
             $pimpinanId = $pimpinan->id;
-        } elseif(in_array(auth()->user()->role_aktif, [ 'wadir1', 'wadir2', 'wadir3', 'kaunit'])){
+        } elseif (in_array(auth()->user()->role_aktif, ['wadir1', 'wadir2', 'wadir3', 'kaunit'])) {
             $atasanService = new AtasanService();
             $pimpinan = $atasanService->getAtasanPegawai($request->pegawai_id);
-            $pimpinanId = $pimpinan->id;           
+            $pimpinanId = $pimpinan->id;
         }
 
         // Explode data rentang cuti
@@ -271,7 +277,7 @@ class CutiController extends Controller
         $isPemohon = $cuti->pegawai->username === $user_login->username;
         $isPejabat = $id_pejabat_login === $cuti->pejabat_id;
         $isPimpinan = $id_pejabat_login === $cuti->pimpinan_id;
-        
+
         return view('cuti::pengajuan_cuti.show', compact(
             'jenis_cuti',
             'cuti',
@@ -311,9 +317,9 @@ class CutiController extends Controller
         $pejabat = $atasanService->getAtasanPegawai($cuti->pegawai->id);
 
         // Ambil data sisa cuti tahun ini
-        $ambilCuti = DB::table('cuti_sisa')->where('pegawai_id', $cuti->pegawai_id)->where('tahun', Carbon::now()->year)->first();
-
-        $sisa_cuti = $ambilCuti->cuti_awal + $ambilCuti->cuti_dibawa;
+        $sisaCutiService = new SisaCutiService();
+        $getCutiSisa = $sisaCutiService->hitungSisaCuti($cuti->pegawai_id);
+        $sisa_cuti = $getCutiSisa['sisa'];
 
         // Tambahan data lain
         $jenis_cuti = JenisCuti::all();
@@ -362,30 +368,6 @@ class CutiController extends Controller
             // Hitung jumlah hari kerja
             $hariKerjaService = new HariKerjaService();
             $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
-
-            // Cek kuota jika jenis cuti adalah "Cuti Tahunan" (id = 1)
-            if ($request->jenis_cuti == 1) {
-                // Ambil tahun dari tanggal mulai cuti
-                $tahunCuti = date('Y', strtotime($awal_cuti));
-                $pegawaiId = $request->pegawai_id;
-
-                // Cari record cuti_sisa untuk pegawai dan tahun ini
-                $cutiSisa = CutiSisa::where('pegawai_id', $pegawaiId)
-                    ->where('tahun', $tahunCuti)
-                    ->first();
-
-                if (!$cutiSisa) {
-                    return redirect()->back()->withInput()->with('danger', 'Data kuota cuti tahunan belum tersedia.');
-                }
-
-                // Hitung sisa kuota
-                $kuota = $cutiSisa->cuti_dibawa > 0 ? $cutiSisa->cuti_dibawa : $cutiSisa->cuti_awal;
-                $sisaKuota = $kuota - $cutiSisa->cuti_digunakan;
-
-                if ($jumlah_cuti > $sisaKuota) {
-                    return redirect()->back()->withInput()->with('danger', "Pengajuan cuti melebihi kuota yang tersisa.");
-                }
-            }
 
             // Cek apakah ada hari kerja
             if ($jumlah_cuti <= 0) {
@@ -698,11 +680,10 @@ class CutiController extends Controller
         $cuti = Cuti::where('access_token', $access_token)->first();
 
         // Ambil data atasan
-        $atasanService = new AtasanService();
-        $atasan = $atasanService->getAtasanPegawai($cuti->pegawai_id);
+        $atasan = Pejabat::firstWhere('id', $cuti->pejabat_id);
 
         // Ambil data pimpinan
-        $pimpinan = Pejabat::where('id', 1)->first();
+        $pimpinan = Pejabat::firstWhere('id', $cuti->pimpinan_id);
 
         // Hitung jumlah cuti sebelum tanggal_mulai dari cuti saat ini
         $pegawaiId = $cuti->pegawai_id;

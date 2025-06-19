@@ -1,3 +1,28 @@
+<?php
+$bulanInggris = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+$bulanIndonesia = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+?>
+
+<?php
+function tanggalIndo($tanggal)
+{
+    $bulanInggris = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    $bulanIndonesia = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    // Format tanggal asli: Y-m-d (sesuaikan jika format berbeda)
+    $tanggalParts = explode('-', $tanggal);
+    $bulanAngka = (int) $tanggalParts[1];
+
+    // Jika tanggal sudah dalam format timestamp (strtotime)
+    if (is_numeric($tanggal)) {
+        $formatInggris = date('d M Y', $tanggal);
+    } else {
+        $formatInggris = date('d M Y', strtotime($tanggal));
+    }
+
+    return str_replace($bulanInggris, $bulanIndonesia, $formatInggris);
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -242,8 +267,8 @@
         </table>
 
         <p>Dengan ini mengajukan permohonan cuti berdasarkan: {{ $cuti->jenis_cuti->deskripsi }}, terhitung mulai
-            tanggal <strong>{{ date('d M Y', strtotime($cuti->tanggal_mulai)) }}</strong> hingga tanggal
-            <strong>{{ date('d M Y', strtotime($cuti->tanggal_selesai)) }}</strong>.
+            tanggal <strong>{{ tanggalIndo($cuti->tanggal_mulai) }}</strong> hingga tanggal
+            <strong>{{ tanggalIndo($cuti->tanggal_selesai) }}</strong>.
         </p>
 
         <p>Untuk keperluan: {{ $cuti->keterangan }}.</p>
@@ -290,7 +315,7 @@
             <div class="signatures">
                 <div class="ttd">
                     <div class="sign">
-                        Banyuwangi, {{ date('d M Y', strtotime($cuti->created_at)) }}<br>
+                        Banyuwangi, {{ tanggalIndo($cuti->created_at) }}<br>
                         Pemohon,<br>
                         <div class="digital-stamp">
                             <div class="stamp-logo">
@@ -300,7 +325,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                
+
                             </div>
                         </div>
                         {{ $cuti->pegawai->gelar_dpn ?? '' }}{{ $cuti->pegawai->gelar_dpn ? ' ' : '' }}{{ $cuti->pegawai->nama }}{{ $cuti->pegawai->gelar_blk ? ', ' . $cuti->pegawai->gelar_blk : '' }}<br>
@@ -316,7 +341,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                
+
                             </div>
                         </div>
                         {{ $atasan->pegawai->gelar_dpn ?? '' }}{{ $atasan->pegawai->gelar_dpn ? ' ' : '' }}{{ $atasan->pegawai->nama }}{{ $atasan->pegawai->gelar_blk ? ', ' . $atasan->pegawai->gelar_blk : '' }}<br>
@@ -332,7 +357,7 @@
                                 Ditandatangani secara elektronik oleh<br>
                                 Direktur Politeknik Negeri Banyuwangi<br>
                                 selaku Pejabat yang Berwenang
-                                
+
                             </div>
                         </div>
                         {{ $pimpinan->pegawai->gelar_dpn ?? '' }}{{ $pimpinan->pegawai->gelar_dpn ? ' ' : '' }}{{ $pimpinan->pegawai->nama }}{{ $pimpinan->pegawai->gelar_blk ? ', ' . $pimpinan->pegawai->gelar_blk : '' }}<br>
