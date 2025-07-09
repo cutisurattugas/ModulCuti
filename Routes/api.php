@@ -16,3 +16,4 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/cuti', function (Request $request) {
     return $request->user();
 });
+Route::get('/tim-kerja/{id}/children', 'TimKerjaController@getChildren')->name('api.timkerja.children');
