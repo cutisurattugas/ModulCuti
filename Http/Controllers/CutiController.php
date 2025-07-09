@@ -164,20 +164,26 @@ class CutiController extends Controller
         // Explode data rentang cuti
         $tanggal = $request->input('rentang_cuti');
         $tanggalRange = explode(' to ', $tanggal);
+
         if (count($tanggalRange) == 2) {
+            // Jika range tanggal (multi hari)
             $awal_cuti = $tanggalRange[0];
             $akhir_cuti = $tanggalRange[1];
-
-            // Hitung jumlah hari kerja
-            $hariKerjaService = new HariKerjaService();
-            $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
-
-            // Cek apakah ada hari kerja
-            if ($jumlah_cuti <= 0) {
-                return redirect()->back()->withInput()->with('error', 'Rentang cuti tidak mencakup hari kerja.');
-            }
-        } elseif (count($tanggalRange) !== 2) {
+        } elseif (count($tanggalRange) == 1) {
+            // Jika hanya 1 hari
+            $awal_cuti = $tanggalRange[0];
+            $akhir_cuti = $tanggalRange[0];
+        } else {
             return redirect()->back()->withInput()->with('error', 'Format rentang cuti tidak valid.');
+        }
+
+        // Hitung jumlah hari kerja
+        $hariKerjaService = new HariKerjaService();
+        $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
+
+        // Cek apakah ada hari kerja
+        if ($jumlah_cuti <= 0) {
+            return redirect()->back()->withInput()->with('error', 'Rentang cuti tidak mencakup hari kerja.');
         }
 
         // Mulai transaksi DB
@@ -361,20 +367,26 @@ class CutiController extends Controller
         // Explode rentang tanggal
         $tanggal = $request->input('rentang_cuti');
         $tanggalRange = explode(' to ', $tanggal);
+
         if (count($tanggalRange) == 2) {
+            // Jika range tanggal (multi hari)
             $awal_cuti = $tanggalRange[0];
             $akhir_cuti = $tanggalRange[1];
-
-            // Hitung jumlah hari kerja
-            $hariKerjaService = new HariKerjaService();
-            $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
-
-            // Cek apakah ada hari kerja
-            if ($jumlah_cuti <= 0) {
-                return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
-            }
-        } elseif (count($tanggalRange) !== 2) {
+        } elseif (count($tanggalRange) == 1) {
+            // Jika hanya 1 hari
+            $awal_cuti = $tanggalRange[0];
+            $akhir_cuti = $tanggalRange[0];
+        } else {
             return redirect()->back()->withInput()->with('danger', 'Format rentang cuti tidak valid.');
+        }
+
+        // Hitung jumlah hari kerja
+        $hariKerjaService = new HariKerjaService();
+        $jumlah_cuti = $hariKerjaService->countHariKerja($awal_cuti, $akhir_cuti);
+
+        // Cek apakah ada hari kerja
+        if ($jumlah_cuti <= 0) {
+            return redirect()->back()->withInput()->with('danger', 'Rentang cuti tidak mencakup hari kerja.');
         }
 
         DB::beginTransaction();

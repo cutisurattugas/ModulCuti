@@ -3,7 +3,7 @@
 namespace Modules\Cuti\Services;
 
 use Carbon\Carbon;
-use Modules\Setting\Entities\Libur;
+use Modules\RekapKehadiran\Entities\Libur;
 
 class HariKerjaService
 {
