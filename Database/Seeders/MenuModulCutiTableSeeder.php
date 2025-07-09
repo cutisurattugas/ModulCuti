@@ -64,5 +64,17 @@ class MenuModulCutiTableSeeder extends Seeder
                 'active' => serialize(['cuti/rekap', 'cuti/rekap*']),
             ]);
         }
+        if ($menu) {
+            Menu::create([
+               'modul' => 'Cuti',
+                'label' => 'Tim Kerja',
+                'url' => 'tim-kerja',
+                'can' => serialize(['admin']),
+                'icon' => 'far fa-circle',
+                'urut' => 2,
+                'parent_id' => $menu->id,
+                'active' => serialize(['tim-kerja', 'tim-kerja*']),
+            ]);
+        }
     }
 }

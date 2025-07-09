@@ -4,10 +4,8 @@ namespace Modules\Cuti\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\Pengaturan\Entities\Anggota;
-use Modules\Pengaturan\Entities\Pegawai;
-use Modules\Pengaturan\Entities\Pejabat;
-use Modules\Pengaturan\Entities\TimKerja;
+use Modules\Jabatan\Entities\Pejabat;
+use Modules\Kepegawaian\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Unit;
 
 class Cuti extends Model

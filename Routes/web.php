@@ -40,5 +40,14 @@ Route::prefix('cuti')->group(function () {
         Route::get('export/excel', 'RekapCutiController@exportExcel')->name('rekap.cuti.export.excel');
     });
 });
+// Tim Kerja
+Route::prefix('tim-kerja')->group(function () {
+    Route::get('/', 'TimKerjaController@index')->name('tim.index');
+    Route::post('/store', 'TimKerjaController@store')->name('tim.store');
+    Route::get('/{id}', 'TimKerjaController@show')->name('tim.show');
+});
 
+Route::prefix('anggota')->group(function () {
+    Route::post('/store', 'AnggotaController@store')->name('anggota.store');
+});
 Route::get('/scan-cuti/{access_token}', 'CutiController@scanCuti')->name('cuti.scan');
