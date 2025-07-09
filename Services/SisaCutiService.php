@@ -13,6 +13,18 @@ class SisaCutiService
     {
         $tahunSekarang = $tahun ?? Carbon::now()->year;
 
+        $pegawai = \Modules\Kepegawaian\Entities\Pegawai::findOrFail($pegawaiId);
+        $nip = $pegawai->nip;
+
+        // Ambil tahun pengangkatan berdasarkan jenis NIP
+        if (strpos($nip, '.') !== false) {
+            // Jenis 2: NIP seperti 2011.36.072
+            $tahunPengangkatan = (int)substr($nip, 0, 4);
+        } else {
+            // Jenis 1: NIP seperti 198403052021212004
+            $tahunPengangkatan = (int)substr($nip, 8, 4);
+        }
+
         // Ambil default jatah cuti tahunan dari tabel jenis_cuti
         $jatahCutiTahunan = JenisCuti::find(1)?->jumlah_cuti ?? 12;
 
@@ -23,41 +35,43 @@ class SisaCutiService
             ->whereYear('tanggal_mulai', $tahunSekarang)
             ->sum('jumlah_cuti');
 
-        // Ambil cuti dari 3 tahun sebelumnya untuk carry over
-        $totalSisaSebelumnya = 0;
-        for ($i = 1; $i <= 3; $i++) {
-            $tahunSebelumnya = $tahunSekarang - $i;
+        $carryOver = 0;
 
-            $cutiTahunSebelumnya = Cuti::where('pegawai_id', $pegawaiId)
-                ->where('jenis_cuti_id', 1)
-                ->where('status', 'Selesai')
-                ->whereYear('tanggal_mulai', $tahunSebelumnya);
+        if ($tahunPengangkatan < $tahunSekarang) {
+            // Ambil cuti dari 3 tahun sebelumnya
+            $totalSisaSebelumnya = 0;
+            for ($i = 1; $i <= 3; $i++) {
+                $tahunSebelumnya = $tahunSekarang - $i;
 
-            if ($cutiTahunSebelumnya->exists()) {
-                $cutiTerpakai = $cutiTahunSebelumnya->sum('jumlah_cuti');
-                $sisa = max($jatahCutiTahunan - $cutiTerpakai, 0);
-                $totalSisaSebelumnya += $sisa;
+                $cutiTahunSebelumnya = Cuti::where('pegawai_id', $pegawaiId)
+                    ->where('jenis_cuti_id', 1)
+                    ->where('status', 'Selesai')
+                    ->whereYear('tanggal_mulai', $tahunSebelumnya);
+
+                if ($cutiTahunSebelumnya->exists()) {
+                    $terpakai = $cutiTahunSebelumnya->sum('jumlah_cuti');
+                    $sisa = max($jatahCutiTahunan - $terpakai, 0);
+                    $totalSisaSebelumnya += $sisa;
+                } else {
+                    $totalSisaSebelumnya += $jatahCutiTahunan; // jika belum pernah cuti, dianggap penuh
+                }
             }
+
+            // Hitung carry over (maks setengah dari total sisa sebelumnya)
+            $carryOver = floor($totalSisaSebelumnya / 2);
         }
 
-        // Hitung cuti yang bisa dibawa ke tahun ini (dibagi dua)
-        $cutiDibawa = floor($totalSisaSebelumnya / 2);
+        // Total jatah maksimal: jatah + carry over
+        $totalJatah = min($jatahCutiTahunan + $carryOver, 24);
 
-        // Total cuti yang dimiliki tahun ini
-        $totalJatah = $jatahCutiTahunan + $cutiDibawa;
-
-        // Batasi maksimal total cuti (misalnya 24 hari)
-        if ($totalJatah > 24) {
-            $totalJatah = 24;
-        }
-
-        // Hitung sisa cuti aktual tahun ini
+        // Sisa cuti = total jatah - terpakai tahun ini
         $sisaCuti = max($totalJatah - $cutiTahunIni, 0);
 
         return [
             'tahun' => $tahunSekarang,
+            'tahun_pengangkatan' => $tahunPengangkatan,
             'jatah_tahun_ini' => $jatahCutiTahunan,
-            'carry_over' => $cutiDibawa,
+            'carry_over' => $carryOver,
             'total_jatah' => $totalJatah,
             'terpakai' => $cutiTahunIni,
             'sisa' => $sisaCuti,

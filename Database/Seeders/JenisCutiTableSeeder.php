@@ -22,6 +22,7 @@ tahun)'],
             ['nama_cuti' => 'Cuti Alasan Penting', 'jumlah_cuti' => '1', 'deskripsi' => ''],
             ['nama_cuti' => 'Cuti Melahirkan', 'jumlah_cuti' => '30', 'deskripsi' => ''],
             ['nama_cuti' => 'Cuti Besar', 'jumlah_cuti' => '12', 'deskripsi'=>''],
+            ['nama_cuti' => 'Cuti Pendampingan Istri Melahirkan', 'jumlah_cuti' => '2', 'deskripsi'=>''],
         ];
 
         foreach ($jeniCuti as $jenis) {
