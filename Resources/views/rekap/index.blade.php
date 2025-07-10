@@ -81,13 +81,12 @@
                                 <td>{{ $pegawai->jumlah_cuti_4 }}</td>
                                 <td>
                                     @php
-                                        $totalJatah = 12;
+                                        $totalJatah = $pegawai->sisa_cuti;
                                         $cutiTahunan = $pegawai->jumlah_cuti_1;
-                                        $sisaCuti = $totalJatah - $cutiTahunan;
                                         $persen = ($cutiTahunan / $totalJatah) * 100;
                                     @endphp
 
-                                    <div class="mb-1">{{ $sisaCuti }} hari</div>
+                                    <div class="mb-1">{{ $totalJatah }} hari</div>
                                     <div class="progress" style="height: 15px;">
                                         <div class="progress-bar 
                                             @if ($persen >= 90) bg-danger
