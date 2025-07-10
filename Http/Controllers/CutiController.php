@@ -215,7 +215,6 @@ class CutiController extends Controller
                 'pegawai_id' => $request->pegawai_id,
                 'pejabat_id' => $request->pejabat_id,
                 'pimpinan_id' => $pimpinanId,
-                'tim_kerja_id' => $request->tim_kerja_id,
                 'jenis_cuti_id' => $request->jenis_cuti,
             ]);
 

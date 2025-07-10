@@ -29,12 +29,10 @@ class CreateCutiTable extends Migration
             $table->timestamp('tanggal_disetujui_pejabat')->nullable();
             $table->unsignedBigInteger('pimpinan_id');
             $table->timestamp('tanggal_disetujui_pimpinan')->nullable();
-            $table->unsignedBigInteger('tim_kerja_id');
             $table->unsignedBigInteger('jenis_cuti_id');
             $table->foreign('pegawai_id')->references('id')->on('pegawais')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('pejabat_id')->references('id')->on('pejabats')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('pimpinan_id')->references('id')->on('pejabats')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('tim_kerja_id')->references('id')->on('tim_kerja')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('jenis_cuti_id')->references('id')->on('jenis_cuti')->onDelete('cascade')->onUpdat('cascade');
             $table->timestamps();
         });

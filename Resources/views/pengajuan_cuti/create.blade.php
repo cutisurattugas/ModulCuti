@@ -84,7 +84,6 @@
                         <div class="row mb-3">
                             <input type="hidden" name="pegawai_id" value="{{ $pegawai->id }}">
                             <input type="hidden" name="pejabat_id" value="{{ $ketua->id }}">
-                            <input type="hidden" name="tim_kerja_id" value="{{ $tim->id }}">
                             <div class="col-md-6">
                                 <label for="jenis_cuti" class="form-label">Jenis Cuti</label>
                                 <select class="form-control" name="jenis_cuti" id="jenis_cuti">
