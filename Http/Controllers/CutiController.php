@@ -19,12 +19,12 @@ use Modules\Cuti\Services\SisaCutiService;
 use Modules\Cuti\Services\HariKerjaService;
 use Modules\Cuti\Services\WhatsappService;
 use Modules\Pengaturan\Entities\Anggota;
-use Modules\Pengaturan\Entities\Pegawai;
 use Modules\Pengaturan\Entities\Pejabat;
 use Modules\Pengaturan\Entities\TimKerja;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Modules\Cuti\Entities\Pegawai;
 use Modules\Cuti\Services\FonnteService;
 
 class CutiController extends Controller

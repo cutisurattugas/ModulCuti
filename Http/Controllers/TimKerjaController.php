@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Cuti\Entities\Anggota;
+use Modules\Cuti\Entities\Pegawai;
 use Modules\Cuti\Entities\TimKerja;
 use Modules\Cuti\Entities\Unit;
 use Modules\Jabatan\Entities\Pejabat;
-use Modules\Kepegawaian\Entities\Pegawai;
 
 class TimKerjaController extends Controller
 {
