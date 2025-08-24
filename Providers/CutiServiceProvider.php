@@ -38,6 +38,9 @@ class CutiServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->register(RouteServiceProvider::class);
+        $this->commands([
+            \Modules\Cuti\Console\Commands\MigrasiCutiLama::class,
+        ]);
     }
 
     /**

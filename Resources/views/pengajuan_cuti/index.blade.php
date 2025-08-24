@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <h1>Cuti</h1>
                     <div class="lead">
-                        Manaje pengajuan cuti.
+                        Manajemen pengajuan cuti.
                         @if (auth()->user()->role_aktif !== 'admin' && auth()->user()->role_aktif !== 'direktur')
                             <a href="{{ route('cuti.create') }}" class="btn btn-primary btn-sm float-right">Buat Pengajuan</a>
                         @endif
