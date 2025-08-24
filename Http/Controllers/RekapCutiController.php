@@ -9,11 +9,11 @@ use Illuminate\Routing\Controller;
 use Modules\Cuti\Entities\Cuti;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\Cuti\Entities\Anggota;
 use Modules\Cuti\Entities\Pegawai;
+use Modules\Cuti\Entities\TimKerja;
 use Modules\Cuti\Exports\RekapCutiExport;
 use Modules\Cuti\Services\SisaCutiService;
-use Modules\Pengaturan\Entities\Anggota;
-use Modules\Pengaturan\Entities\TimKerja;
 
 class RekapCutiController extends Controller
 {
@@ -43,7 +43,7 @@ class RekapCutiController extends Controller
         $pegawaiQuery = Pegawai::query();
 
         // Jika login sebagai kajur
-        if ($user->role_aktif === 'kajur') {
+        if (in_array($user->role_aktif, ['kaunit','kajur', 'wadir1', 'wadir2', 'wadir3'])) {
             // Ambil pegawai login
             $pegawaiLogin = Pegawai::where('username', $user->username)->first();
 

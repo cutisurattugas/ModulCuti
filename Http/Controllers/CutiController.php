@@ -2,8 +2,6 @@
 
 namespace Modules\Cuti\Http\Controllers;
 
-use App\Models\Core\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -12,20 +10,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Cuti\Entities\Cuti;
 use Modules\Cuti\Entities\CutiLogs;
-use Modules\Cuti\Entities\CutiSisa;
 use Modules\Cuti\Entities\JenisCuti;
 use Modules\Cuti\Services\AtasanService;
 use Modules\Cuti\Services\SisaCutiService;
 use Modules\Cuti\Services\HariKerjaService;
-use Modules\Cuti\Services\WhatsappService;
-use Modules\Pengaturan\Entities\Anggota;
-use Modules\Pengaturan\Entities\Pejabat;
-use Modules\Pengaturan\Entities\TimKerja;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Modules\Cuti\Entities\Anggota;
 use Modules\Cuti\Entities\Pegawai;
+use Modules\Cuti\Entities\TimKerja;
 use Modules\Cuti\Services\FonnteService;
+use Modules\Jabatan\Entities\Pejabat;
 
 class CutiController extends Controller
 {
@@ -60,7 +55,7 @@ class CutiController extends Controller
                 ->union($cutiSebagaiAtasan)
                 ->latest('created_at')
                 ->get();
-        } elseif (in_array($role, ['kajur', 'wadir1', 'wadir2', 'wadir3'])) {
+        } elseif (in_array($role, ['kaunit', 'kajur', 'wadir1', 'wadir2', 'wadir3'])) {
             // Cuti yang diajukan ke saya sebagai atasan langsung
             $cutiSebagaiAtasan = Cuti::where('pejabat_id', $pejabat_id)
                 ->whereHas('logs', fn($q) => $q->where('status', 'Telah diteruskan ke atasan'));
@@ -149,13 +144,13 @@ class CutiController extends Controller
         ]);
 
         // Get data pimpinan
-        if (in_array(auth()->user()->role_aktif, ['pegawai', 'dosen'])) {
+        if (in_array(auth()->user()->role_aktif, ['pegawai', 'dosen', 'kaunit'])) {
             $atasan = Pejabat::firstWhere('id', $request->pejabat_id);
             $idPegawaiAtasan = Pegawai::firstWhere('id', $atasan->pegawai_id)->id;
             $atasanService = new AtasanService();
             $pimpinan = $atasanService->getAtasanPegawai($idPegawaiAtasan);
             $pimpinanId = $pimpinan->id;
-        } elseif (in_array(auth()->user()->role_aktif, ['wadir1', 'wadir2', 'wadir3', 'kaunit'])) {
+        } elseif (in_array(auth()->user()->role_aktif, ['wadir1', 'wadir2', 'wadir3'])) {
             $atasanService = new AtasanService();
             $pimpinan = $atasanService->getAtasanPegawai($request->pegawai_id);
             $pimpinanId = $pimpinan->id;
@@ -257,7 +252,7 @@ class CutiController extends Controller
 
         // Ambil ID pejabat login (jika operator)
         $id_pejabat_login = null;
-        if (in_array($user_login->role_aktif, ['direktur', 'kajur', 'wadir1', 'wadir2', 'wadir3'])) {
+        if (in_array($user_login->role_aktif, ['direktur', 'kajur', 'wadir1', 'wadir2', 'wadir3', 'kaunit'])) {
             $username_user_login = $user_login->username;
             $pegawai_login = Pegawai::firstWhere('username', $username_user_login);
             $pejabat_login = Pejabat::firstWhere('pegawai_id', $pegawai_login->id);
@@ -575,7 +570,8 @@ class CutiController extends Controller
             $cuti->tanggal_disetujui_pimpinan = now();
 
             // ⏺ Tambahan: cek apakah pemohon adalah wakil direktur
-            $role_pemohon = optional($cuti->pegawai->user)->role_aktif;
+            $pemohon = Pegawai::where('username', $cuti->pegawai->username)->first();
+            $role_pemohon = $pemohon->user->role_aktif;
             $isWakilDirektur = in_array($role_pemohon, ['wadir1', 'wadir2', 'wadir3']);
 
             if ($isWakilDirektur) {
@@ -765,7 +761,7 @@ class CutiController extends Controller
 
             // Jika status sudah "Selesai", atau baru saja diubah ke "Selesai", tetap buat QR dan tampilkan PDF
             if ($cuti->status === 'Selesai') {
-                $qrCodeUrl = url("/tracking-cuti/" . $cuti->access_token);
+                $qrCodeUrl = url("/scan-cuti/" . $cuti->access_token);
                 $qrCodeImage = QrCode::format('svg')->size(100)->generate($qrCodeUrl);
 
                 return view('cuti::pdf.index', compact('cuti', 'atasan', 'pimpinan', 'cutiCounts', 'qrCodeImage'));
